@@ -42,25 +42,27 @@ public class AskFor {
 		do {
 			repeat = false;
 			String rawValue = string(field.getName(), dv);
-
 			try {
-				// TODO later: use raw value validator specified on field
+				if (!rawValue.equals(dv)) { // no need to process default value
 
-				value = Converter.convert(rawValue, field);
+					// TODO later: use raw value validator specified on field
 
-				// TODO later: use value validator specified on field
+					value = Converter.convert(rawValue, field);
 
-				field.set(value);
+					// TODO later: use value validator specified on field
+
+					field.set(value);
+				}
 			} catch (Exception e) {
 				repeat = e instanceof ConvertFailedException; // TODO later: or validation exceptions
 				System.out.printf("%40s   %s%n", "", e.getMessage());
 			}
 		} while (repeat);
-
 	}
 
 	@Nonnull
 	public static String string(@Nonnull String name, String defaultValue) {
+		// TODO: acceptEmpty option?
 
 		// build up output
 

@@ -3,6 +3,7 @@ package hu.juzraai.cliask.core;
 import hu.juzraai.cliask.annotation.Ask;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 
 /**
  * @author Zsolt Jurányi
@@ -30,8 +31,9 @@ public class PreparedField {
 		boolean relevant = true;
 		try {
 			field.setAccessible(true);
-			// TODO also check type: String, Integer, basic are OK, others OK if there's @AskAndConvert or @AskRecursively
-			relevant = field.isAnnotationPresent(Ask.class);
+			// TODO later: maybe we can check if there's proper converter or @AskRecursively
+			relevant = field.isAnnotationPresent(Ask.class)
+					&& ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL);
 		} catch (SecurityException e) {
 			// TODO LOG
 			relevant = false;

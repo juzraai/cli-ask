@@ -19,6 +19,6 @@ public class ConvertToBoolean implements ConvertTo<Boolean> {
 		if (rawValue.toUpperCase().matches(FALSE_PATTERN)) {
 			return Boolean.FALSE;
 		}
-		throw new ConvertFailedException(String.format("Invalid boolean value, specify one of these: %s|%s", TRUE_PATTERN, FALSE_PATTERN);
+		throw new ConvertFailedException(String.format("Invalid boolean value, specify one of these: %s|%s", TRUE_PATTERN, FALSE_PATTERN));
 	}
 }

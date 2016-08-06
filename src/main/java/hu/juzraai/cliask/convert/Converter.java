@@ -15,8 +15,21 @@ public class Converter {
 	private static final Map<Class<?>, ConvertTo<?>> CONVERTERS = new LinkedHashMap<>();
 
 	static {
+		// string (NOP)
 		addConverter(String.class, new ConvertToString());
+
+		// integers
+		addConverter(Byte.TYPE, new ConvertToByte());
+		addConverter(Short.TYPE, new ConvertToShort());
 		addConverter(Integer.TYPE, new ConvertToInteger());
+		addConverter(Long.TYPE, new ConvertToLong());
+
+		// floats
+		addConverter(Float.TYPE, new ConvertToFloat());
+		addConverter(Double.TYPE, new ConvertToDouble());
+
+		// boolean
+		addConverter(Boolean.TYPE, new ConvertToBoolean());
 	}
 
 	public static <T> void addConverter(@Nonnull Class<T> type, @Nonnull ConvertTo<T> converter) {
