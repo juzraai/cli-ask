@@ -1,0 +1,8 @@
+# IntelliJ
+.idea/dictionaries
+.idea/libraries
+workspace.xml
+tasks.xml
+
+# Binaries
+target/
