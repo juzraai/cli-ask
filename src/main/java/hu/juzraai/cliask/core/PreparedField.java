@@ -17,6 +17,8 @@
 package hu.juzraai.cliask.core;
 
 import hu.juzraai.cliask.annotation.Ask;
+import hu.juzraai.cliask.annotation.UseConverter;
+import hu.juzraai.cliask.convert.ConvertTo;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -31,50 +33,57 @@ public class PreparedField {
 	private final boolean relevant;
 	private final String name;
 	private final Object defaultValue;
+	private final ConvertTo<?> converter;
 
-	protected PreparedField(Field field, Object object, boolean relevant, String name, Object defaultValue) {
+	protected PreparedField(Field field, Object object, boolean relevant, String name, Object defaultValue, ConvertTo<?> converter) {
 		this.field = field;
 		this.object = object;
 		this.relevant = relevant;
 		this.name = name;
 		this.defaultValue = defaultValue;
+		this.converter = converter;
 	}
 
 	public static PreparedField prepare(Field field, Object object) {
-
-		// relevance
-
 		boolean relevant = true;
+		String name = null;
+		Object defaultValue = null;
+		ConvertTo<?> converter = null;
+
 		try {
-			field.setAccessible(true);
-			// TODO later: maybe we can check if there's proper converter or @AskRecursively
+
+			// relevance
 			relevant = field.isAnnotationPresent(Ask.class)
 					&& ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL);
-		} catch (SecurityException e) {
+			// TODO later: maybe we can check if there's proper converter or @AskRecursively
+
+			if (relevant) {
+				field.setAccessible(true); // throws SE
+
+				// name
+				Ask ask = field.getAnnotation(Ask.class);
+				name = null != ask && ask.value().isEmpty() ? field.getName() : ask.value();
+
+				// default value
+				defaultValue = field.get(object); // throws IAE
+
+				// converter
+
+				UseConverter useConverter = field.getAnnotation(UseConverter.class);
+				if (null != useConverter) {
+					converter = useConverter.value().newInstance(); // throws IE, IAE
+				}
+			}
+		} catch (SecurityException | InstantiationException | IllegalAccessException e) {
 			// TODO LOG
 			relevant = false;
 		}
 
-		String name = null;
-		Object defaultValue = null;
-		if (relevant) {
+		return new PreparedField(field, object, relevant, name, defaultValue, converter);
+	}
 
-			// name
-
-			Ask ask = field.getAnnotation(Ask.class);
-			name = null != ask && ask.value().isEmpty() ? field.getName() : ask.value();
-
-			// default value
-
-			try {
-				defaultValue = field.get(object);
-			} catch (IllegalAccessException e) {
-				// TODO LOG
-				relevant = false;
-			}
-		}
-
-		return new PreparedField(field, object, relevant, name, defaultValue);
+	public ConvertTo<?> getConverter() {
+		return converter;
 	}
 
 	public Object getDefaultValue() {

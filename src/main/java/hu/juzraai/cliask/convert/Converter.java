@@ -56,11 +56,13 @@ public class Converter {
 	public static Object convert(@Nonnull String rawValue, @Nonnull PreparedField field) throws ConvertFailedException {
 		Class<?> type = field.getField().getType();
 
-		// TODO later: if converter class specified in field, use that one
-
-		for (Map.Entry<Class<?>, ConvertTo<?>> entry : CONVERTERS.entrySet()) {
-			if (type.isAssignableFrom(entry.getKey())) {
-				return entry.getValue().convert(rawValue);
+		if (null != field.getConverter()) {
+			return field.getConverter().convert(rawValue);
+		} else {
+			for (Map.Entry<Class<?>, ConvertTo<?>> entry : CONVERTERS.entrySet()) {
+				if (type.isAssignableFrom(entry.getKey())) {
+					return entry.getValue().convert(rawValue);
+				}
 			}
 		}
 

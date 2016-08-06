@@ -10,7 +10,7 @@
 
 
 
-# Usage
+# Quick usage example
 
 Define your data class:
 
@@ -58,7 +58,7 @@ typed-user/typed-repo
 * **default values** - read from POJO, printed out, and selected when entered input is emtpy
 * **reasking** - when there's no default value and input is empty; or input is invalid according to selected converter
 * **converting** - automatically selects converter (String -> field type)
-* **flexible** - you can replace default converters and you can add converters for custom types
+* **flexible** - you can replace default converters and you can add custom converters for types or fields 
 * does not need fields to be public, nor getter/setter methods
 * **easy-to-use** - annotation-driven, you have to call one method (per POJO)
 
@@ -73,8 +73,10 @@ boolean                           | Uses patterns `TRUE|YES|ON|1` and `FALSE|NO|
 
 
  
-# Future
+# Future ideas
  
-* raw value validation
-* (final, converted) value validation
-* recursive "asking" - go deeper in POJOs
+* raw value validation - `@ValidateRawValue(class)`
+* (final, converted) value validation - `@ValidateValue(class)`
+* skip condition - e.g. skip asking GitHub repo if GitHub user is empty - `@Skip(class)`, `boolean skip(Object)`
+* recursive "asking" - go deeper in POJOs - `@AskRecursively`
+* colored output using [Jansi](https://github.com/fusesource/jansi)
