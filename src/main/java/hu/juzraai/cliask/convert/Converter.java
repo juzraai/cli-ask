@@ -36,16 +36,23 @@ public class Converter {
 
 		// integers
 		addConverter(Byte.TYPE, new ConvertToByte());
+		addConverter(Byte.class, new ConvertToByte());
 		addConverter(Short.TYPE, new ConvertToShort());
+		addConverter(Short.class, new ConvertToShort());
 		addConverter(Integer.TYPE, new ConvertToInteger());
+		addConverter(Integer.class, new ConvertToInteger());
 		addConverter(Long.TYPE, new ConvertToLong());
+		addConverter(Long.class, new ConvertToLong());
 
 		// floats
 		addConverter(Float.TYPE, new ConvertToFloat());
+		addConverter(Float.class, new ConvertToFloat());
 		addConverter(Double.TYPE, new ConvertToDouble());
+		addConverter(Double.class, new ConvertToDouble());
 
 		// boolean
 		addConverter(Boolean.TYPE, new ConvertToBoolean());
+		addConverter(Boolean.class, new ConvertToBoolean());
 	}
 
 	public static <T> void addConverter(@Nonnull Class<T> type, @Nonnull ConvertTo<T> converter) {
