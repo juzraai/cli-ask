@@ -23,40 +23,59 @@
 Define your data class:
 
 ```java
-@Ask("test data")
-public class MyData {
+@Ask("sample data")
+public static class ExamplePojo {
 
-	@Ask("GitHub username")
-	private String ghuser = "juzraai";
+    @Ask
+    private String name;
 
-	@Ask("GitHub repository name")
-	private String ghrepo;
+    @Ask("How old are you?")
+    private Byte age;
 
-	@Override
-	public String toString() { // for test purposes
-		return ghuser + "/" + ghrepo;
-	}
+    private String skippedField = "untouched";
+
+    @Ask("Are you sure?")
+    private boolean sure = true;
+
+    @Override
+    public String toString() {
+        return "ExamplePojo{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", skippedField='" + skippedField + '\'' +
+                ", sure=" + sure +
+                '}';
+    }
 }
 ```
 
 Call **AskFor** in your program:
 
 ```java
-MyData data = AskFor.object(new MyData());
-System.out.println("Result:\n" + data);
+System.out.println(AskFor.object(new ExamplePojo()));
 ```
 
 And you'll see this:
 
 ```
-Please provide test data:
+Please provide sample data :
 
-                        GitHub username
-                   [default: 'juzraai'] : typed-user
+                                    name : <hit ENTER>
+                                           There's no default value, please try again!
 
-                 GitHub repository name : typed-repo
-Result:
-typed-user/typed-repo
+                                    name : juzraai
+
+                        How old are you? : <hit ENTER>
+                                           There's no default value, please try again!
+
+                        How old are you? : very
+                                           Invalid value for: byte
+
+                        How old are you? : 42
+
+                           Are you sure?
+                       [default: 'true'] : no
+ExamplePojo{name='juzraai', age=42, skippedField='untouched', sure=false}
 ```
 
 
@@ -83,9 +102,11 @@ boolean                           | Uses patterns `TRUE|YES|ON|1` and `FALSE|NO|
 
 # Documentation
 
+
 ## Dependency
 
 You can add ***CLI-Ask*** as dependency using [JitPack.io](https://jitpack.io/#juzraai/cli-ask). Follow the link to get information on how to do this, click on the green *"Get it"* button besides the latest version and scroll down to code snippets.
+
 
 ## Simple input
 
@@ -106,7 +127,7 @@ System.out.printf("Test 1 = %s%nTest 2 = %s%n", s1, s2);
 Example output:
 
 ```
-                                   Test 1
+                                  Test 1
                     [default: 'example'] : <hit ENTER>
 
                                   Test 2 : <hit ENTER>
@@ -118,6 +139,13 @@ Test 2 = okay then
 ```
 
 You can try it yourself by running `main` method of `hu.juzraai.cliask.example.SimpleInput`.
+
+## Ask for POJO
+
+**TODO: how to define class, how AskFor.object works, 2 way to add converters**
+
+Check [quick example](#quick-usage-example) again, or you can test it by running `main` method of `hu.juzraai.cliask.example.PojoInput`.
+ 
 
 
 # Version history
