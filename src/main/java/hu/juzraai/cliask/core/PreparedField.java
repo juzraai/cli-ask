@@ -20,6 +20,7 @@ import hu.juzraai.cliask.annotation.Ask;
 import hu.juzraai.cliask.annotation.UseConverter;
 import hu.juzraai.cliask.convert.ConvertTo;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
@@ -35,7 +36,7 @@ public class PreparedField {
 	private final Object defaultValue;
 	private final ConvertTo<?> converter;
 
-	protected PreparedField(Field field, Object object, boolean relevant, String name, Object defaultValue, ConvertTo<?> converter) {
+	protected PreparedField(@Nonnull Field field, @Nonnull Object object, boolean relevant, @Nonnull String name, Object defaultValue, ConvertTo<?> converter) {
 		this.field = field;
 		this.object = object;
 		this.relevant = relevant;
@@ -44,25 +45,27 @@ public class PreparedField {
 		this.converter = converter;
 	}
 
-	public static PreparedField prepare(Field field, Object object) {
+	@Nonnull
+	public static PreparedField prepare(@Nonnull Field field, @Nonnull Object object) {
 		boolean relevant = true;
-		String name = null;
+		String name = field.getName();
 		Object defaultValue = null;
 		ConvertTo<?> converter = null;
 
 		try {
 
 			// relevance
-			relevant = field.isAnnotationPresent(Ask.class)
-					&& ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL);
+			Ask ask = field.getAnnotation(Ask.class);
+			relevant = null != ask && ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL);
 			// TODO later: maybe we can check if there's proper converter or @AskRecursively
 
 			if (relevant) {
 				field.setAccessible(true); // throws SE
 
 				// name
-				Ask ask = field.getAnnotation(Ask.class);
-				name = null != ask && ask.value().isEmpty() ? field.getName() : ask.value();
+				if (!ask.value().isEmpty()) {
+					name = ask.value();
+				}
 
 				// default value
 				defaultValue = field.get(object); // throws IAE
@@ -90,14 +93,17 @@ public class PreparedField {
 		return defaultValue;
 	}
 
+	@Nonnull
 	public Field getField() {
 		return field;
 	}
 
+	@Nonnull
 	public String getName() {
 		return name;
 	}
 
+	@Nonnull
 	public Object getObject() {
 		return object;
 	}

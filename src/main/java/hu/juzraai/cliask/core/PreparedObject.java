@@ -18,6 +18,7 @@ package hu.juzraai.cliask.core;
 
 import hu.juzraai.cliask.annotation.Ask;
 
+import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,14 +33,15 @@ public class PreparedObject {
 	private final String name;
 	private final List<PreparedField> fields;
 
-	protected PreparedObject(Class<?> clazz, Object object, String name, List<PreparedField> fields) {
+	protected PreparedObject(@Nonnull Class<?> clazz, @Nonnull Object object, @Nonnull String name, @Nonnull List<PreparedField> fields) {
 		this.clazz = clazz;
 		this.object = object;
 		this.name = name;
 		this.fields = fields;
 	}
 
-	public static PreparedObject prepare(Object object) {
+	@Nonnull
+	public static PreparedObject prepare(@Nonnull Object object) {
 		Class<?> clazz = object.getClass();
 
 		// name
@@ -60,21 +62,23 @@ public class PreparedObject {
 		return new PreparedObject(clazz, object, name, fields);
 	}
 
+	@Nonnull
 	public Class<?> getClazz() {
 		return clazz;
 	}
 
+	@Nonnull
 	public List<PreparedField> getFields() {
 		return fields;
 	}
 
+	@Nonnull
 	public String getName() {
 		return name;
 	}
 
+	@Nonnull
 	public Object getObject() {
 		return object;
 	}
-
-
 }
