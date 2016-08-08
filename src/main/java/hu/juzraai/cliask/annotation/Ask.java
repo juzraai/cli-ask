@@ -16,6 +16,9 @@
 
 package hu.juzraai.cliask.annotation;
 
+import hu.juzraai.cliask.convert.ConvertTo;
+import hu.juzraai.cliask.convert.DefaultConverter;
+
 import javax.annotation.Nonnull;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -26,8 +29,11 @@ import java.lang.annotation.Target;
  * @author Zsolt Jurányi
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE, ElementType.FIELD})
+@Target({ElementType.FIELD})
 public @interface Ask {
+
+	@Nonnull
+	Class<? extends ConvertTo<?>> converter() default DefaultConverter.class;
 
 	@Nonnull
 	String value() default "";

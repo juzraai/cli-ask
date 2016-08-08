@@ -17,8 +17,8 @@
 package hu.juzraai.cliask.core;
 
 import hu.juzraai.cliask.annotation.Ask;
-import hu.juzraai.cliask.annotation.UseConverter;
 import hu.juzraai.cliask.convert.ConvertTo;
+import hu.juzraai.cliask.convert.DefaultConverter;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -27,20 +27,20 @@ import java.lang.reflect.Modifier;
 /**
  * @author Zsolt Jurányi
  */
-public class PreparedField {
+public class PreparedField { // TODO doc
 
 	private final Field field;
 	private final Object object;
 	private final boolean relevant;
-	private final String name;
+	private final String label;
 	private final Object defaultValue;
 	private final ConvertTo<?> converter;
 
-	protected PreparedField(@Nonnull Field field, @Nonnull Object object, boolean relevant, @Nonnull String name, Object defaultValue, ConvertTo<?> converter) {
+	protected PreparedField(@Nonnull Field field, @Nonnull Object object, boolean relevant, @Nonnull String label, Object defaultValue, ConvertTo<?> converter) {
 		this.field = field;
 		this.object = object;
 		this.relevant = relevant;
-		this.name = name;
+		this.label = label;
 		this.defaultValue = defaultValue;
 		this.converter = converter;
 	}
@@ -48,7 +48,7 @@ public class PreparedField {
 	@Nonnull
 	public static PreparedField prepare(@Nonnull Field field, @Nonnull Object object) {
 		boolean relevant = true;
-		String name = field.getName();
+		String label = field.getName();
 		Object defaultValue = null;
 		ConvertTo<?> converter = null;
 
@@ -62,9 +62,9 @@ public class PreparedField {
 			if (relevant) {
 				field.setAccessible(true); // throws SE
 
-				// name
+				// label
 				if (!ask.value().isEmpty()) {
-					name = ask.value();
+					label = ask.value();
 				}
 
 				// default value
@@ -72,9 +72,9 @@ public class PreparedField {
 
 				// converter
 
-				UseConverter useConverter = field.getAnnotation(UseConverter.class);
-				if (null != useConverter) {
-					converter = useConverter.value().newInstance(); // throws IE, IAE
+				Class<? extends ConvertTo<?>> converterClass = ask.converter();
+				if (!DefaultConverter.class.equals(converterClass)) {
+					converter = converterClass.newInstance(); // throws IE, IAE
 				}
 			}
 		} catch (SecurityException | InstantiationException | IllegalAccessException e) {
@@ -82,7 +82,7 @@ public class PreparedField {
 			relevant = false;
 		}
 
-		return new PreparedField(field, object, relevant, name, defaultValue, converter);
+		return new PreparedField(field, object, relevant, label, defaultValue, converter);
 	}
 
 	public ConvertTo<?> getConverter() {
@@ -99,8 +99,8 @@ public class PreparedField {
 	}
 
 	@Nonnull
-	public String getName() {
-		return name;
+	public String getLabel() {
+		return label;
 	}
 
 	@Nonnull

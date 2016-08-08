@@ -23,7 +23,6 @@
 Define your data class:
 
 ```java
-@Ask("sample data")
 public static class ExamplePojo {
 
     @Ask
@@ -52,7 +51,7 @@ public static class ExamplePojo {
 Call **AskFor** in your program:
 
 ```java
-System.out.println(AskFor.object(new ExamplePojo()));
+System.out.println(AskFor.object("Please provide sample data", new ExamplePojo()));
 ```
 
 And you'll see this:
@@ -110,9 +109,9 @@ You can add ***CLI-Ask*** as dependency using [JitPack.io](https://jitpack.io/#j
 
 ## Simple input
 
-You can ask for a `String` using `AskFor.string(String name, String defaultValue)` method.
+You can ask for a `String` using `AskFor.string(String label, String defaultValue)` method.
 
-* `name` will be printed out as a prompt, aligned to the center of the terminal (assuming width is 80 chars)
+* `label` will be printed out as a prompt, aligned to the center of the terminal (assuming width is 80 chars)
 * `defaultValue`, if specified, will be printed under the prompt and it will be returned if user provides empty input
 * if `defaultValue` is `null`, `AskFor.string` will keep reasking till user provides non-empty input
 

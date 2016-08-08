@@ -17,10 +17,19 @@
 package hu.juzraai.cliask.convert;
 
 /**
+ * Exception type used in converters. They should gather all known exceptions
+ * and produce a new instance of {@link ConvertFailedException}.
+ *
  * @author Zsolt Jurányi
  */
 public class ConvertFailedException extends Exception {
 
+	/**
+	 * Creates a new instance.
+	 *
+	 * @param message Exception message which describes the problem for the
+	 *                user
+	 */
 	public ConvertFailedException(String message) {
 		super(message);
 	}

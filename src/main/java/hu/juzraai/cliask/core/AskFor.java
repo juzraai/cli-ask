@@ -23,12 +23,19 @@ import javax.annotation.Nonnull;
 import java.util.Scanner;
 
 /**
+ * This is the place of CLI-Ask's main functions.
+ *
  * @author Zsolt Jurányi
  */
-public class AskFor {
+public class AskFor { // TODO doc
 
 	@Nonnull
 	public static <T> T object(@Nonnull T object) {
+		return object(null, object);
+	}
+
+	@Nonnull
+	public static <T> T object(String label, @Nonnull T object) {
 
 		// parse metadata
 		PreparedObject preparedObject = PreparedObject.prepare(object);
@@ -37,8 +44,8 @@ public class AskFor {
 		if (!preparedObject.getFields().isEmpty()) {
 
 			// if we have a dataset name, write header
-			if (!preparedObject.getName().isEmpty()) {
-				System.out.printf("%nPlease provide %s :%n", preparedObject.getName());
+			if (null != label && !label.trim().isEmpty()) {
+				System.out.printf("%n%s :%n", label);
 			}
 
 			// ask for fields
@@ -57,13 +64,13 @@ public class AskFor {
 		Object value = null;
 		do {
 			repeat = false;
-			String rawValue = string(field.getName(), dv);
+			String rawValue = string(field.getLabel(), dv);
 			try {
 				if (!rawValue.equals(dv)) { // no need to process default value
 
 					// TODO later: use raw value validator specified on field
 
-					value = Converter.convert(rawValue, field);
+					value = Converter.convert(rawValue, field.getField().getType(), field.getConverter());
 
 					// TODO later: use value validator specified on field
 
@@ -74,6 +81,11 @@ public class AskFor {
 				System.out.printf("%40s   %s%n", "", e.getMessage());
 			}
 		} while (repeat);
+	}
+
+	@Nonnull
+	public static String string(@Nonnull String label) {
+		return string(label, null);
 	}
 
 	@Nonnull

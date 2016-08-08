@@ -16,14 +16,22 @@
 
 package hu.juzraai.cliask.convert;
 
-import hu.juzraai.cliask.core.PreparedField;
-
 import javax.annotation.Nonnull;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 
 /**
+ * Converter engine used in CLI-Ask, to convert String input into various types.
+ * It holds a Map of converters where key is the target type and value is the
+ * appropriate converter instance.
+ * <p>
+ * Its static initializer adds default converters into the map for String (NOP)
+ * and all primitives and their boxed types.
+ * <p>
+ * Of course, default converters can be overriden and new (type,converter) pairs
+ * can be added.
+ *
  * @author Zsolt Jurányi
  */
 public class Converter {
@@ -55,16 +63,35 @@ public class Converter {
 		addConverter(Boolean.class, new ConvertToBoolean());
 	}
 
+	/**
+	 * Adds (or replaces) converter for the given type.
+	 *
+	 * @param type      Target type of the converter
+	 * @param converter Converter instance
+	 * @param <T>       Target type of the converter
+	 */
 	public static <T> void addConverter(@Nonnull Class<T> type, @Nonnull ConvertTo<T> converter) {
 		CONVERTERS.put(type, converter);
 	}
 
+	/**
+	 * Converts the given string into the given target type. If third argument
+	 * is non-null, uses that as converter, otherwise tries to find converter
+	 * from the internal storage.
+	 * <p>
+	 * If no proper converter was found, throws {@link UnsupportedOperationException}.
+	 *
+	 * @param rawValue  Input string value to be converted
+	 * @param type      Target type
+	 * @param converter Optional converter to be used instead of internal
+	 *                  converters
+	 * @return The result of the conversion
+	 * @throws ConvertFailedException If conversion fails
+	 */
 	@Nonnull
-	public static Object convert(@Nonnull String rawValue, @Nonnull PreparedField field) throws ConvertFailedException {
-		Class<?> type = field.getField().getType();
-
-		if (null != field.getConverter()) {
-			return field.getConverter().convert(rawValue);
+	public static Object convert(@Nonnull String rawValue, @Nonnull Class<?> type, ConvertTo<?> converter) throws ConvertFailedException {
+		if (null != converter) {
+			return converter.convert(rawValue);
 		} else {
 			for (Map.Entry<Class<?>, ConvertTo<?>> entry : CONVERTERS.entrySet()) {
 				if (type.isAssignableFrom(entry.getKey())) {

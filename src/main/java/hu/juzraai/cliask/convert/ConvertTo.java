@@ -19,10 +19,23 @@ package hu.juzraai.cliask.convert;
 import javax.annotation.Nonnull;
 
 /**
+ * Interface of converters which transform a raw input string into a target
+ * type. The name of this interface was constructed so it can be read out
+ * "Convert to X".
+ *
  * @author Zsolt Jurányi
  */
 public interface ConvertTo<T> {
 
+	/**
+	 * This method should convert the input value into the target type. If any
+	 * error occurs, it should produce {@link ConvertFailedException} instead of
+	 * other exceptions.
+	 *
+	 * @param rawValue The input value to be converted
+	 * @return Result of the conversion
+	 * @throws ConvertFailedException If any error occurs during conversion
+	 */
 	@Nonnull
 	T convert(@Nonnull String rawValue) throws ConvertFailedException;
 }

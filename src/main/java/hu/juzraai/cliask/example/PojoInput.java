@@ -39,13 +39,7 @@ public class PojoInput {
 
 	/**
 	 * Example POJO class used in the demo program.
-	 * <p>
-	 * <code>@Ask</code> annotation is optional on classes, it's only effect is
-	 * that <code>AskFor.object(Object)</code> will print out <em>"Please
-	 * provide X:"</em> (X is the value of the annotation) before asking for
-	 * relevant fields.
 	 */
-	@Ask("sample data")
 	public static class ExamplePojo {
 
 		/**

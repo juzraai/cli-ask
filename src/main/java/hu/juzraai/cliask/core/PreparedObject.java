@@ -16,8 +16,6 @@
 
 package hu.juzraai.cliask.core;
 
-import hu.juzraai.cliask.annotation.Ask;
-
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -26,30 +24,21 @@ import java.util.List;
 /**
  * @author Zsolt Jurányi
  */
-public class PreparedObject {
+public class PreparedObject { // TODO doc
 
 	private final Class<?> clazz;
 	private final Object object;
-	private final String name;
 	private final List<PreparedField> fields;
 
-	protected PreparedObject(@Nonnull Class<?> clazz, @Nonnull Object object, @Nonnull String name, @Nonnull List<PreparedField> fields) {
+	protected PreparedObject(@Nonnull Class<?> clazz, @Nonnull Object object, @Nonnull List<PreparedField> fields) {
 		this.clazz = clazz;
 		this.object = object;
-		this.name = name;
 		this.fields = fields;
 	}
 
 	@Nonnull
 	public static PreparedObject prepare(@Nonnull Object object) {
 		Class<?> clazz = object.getClass();
-
-		// name
-
-		Ask ask = clazz.getAnnotation(Ask.class);
-		String name = null != ask && !ask.value().isEmpty() ? ask.value() : "";
-
-		// fields
 
 		List<PreparedField> fields = new ArrayList<>();
 		for (Field field : clazz.getDeclaredFields()) {
@@ -59,7 +48,7 @@ public class PreparedObject {
 			}
 		}
 
-		return new PreparedObject(clazz, object, name, fields);
+		return new PreparedObject(clazz, object, fields);
 	}
 
 	@Nonnull
@@ -70,11 +59,6 @@ public class PreparedObject {
 	@Nonnull
 	public List<PreparedField> getFields() {
 		return fields;
-	}
-
-	@Nonnull
-	public String getName() {
-		return name;
 	}
 
 	@Nonnull
