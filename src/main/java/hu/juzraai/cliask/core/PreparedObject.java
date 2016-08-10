@@ -22,20 +22,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Prepares (an object for asking by preparing its fields via {@link
+ * PreparedField}'s <code>prepare</code> method, and collecting relevant fields.
+ * {@link PreparedObject} contains the input object itself, and it's
+ * fields that needs to be asked.
+ *
  * @author Zsolt Jurányi
  */
-public class PreparedObject { // TODO doc
+public class PreparedObject {
 
-	private final Class<?> clazz;
 	private final Object object;
 	private final List<PreparedField> fields;
 
-	protected PreparedObject(@Nonnull Class<?> clazz, @Nonnull Object object, @Nonnull List<PreparedField> fields) {
-		this.clazz = clazz;
+	protected PreparedObject(@Nonnull Object object, @Nonnull List<PreparedField> fields) {
 		this.object = object;
 		this.fields = fields;
 	}
 
+	/**
+	 * Prepares (creates interpreted version of) an input object which then
+	 * needs to be asked. Calls {@link PreparedField}'s <code>prepare</code>
+	 * method to interpret declared fields of the object, then collects relevant
+	 * fields. Finally produces a {@link PreparedObject} containing all
+	 * necessary data for {@link AskFor}.
+	 *
+	 * @param object The input object which needs to be prepared for asking
+	 * @return A prepared object containing the input object and it's relevant
+	 * fields as {@link PreparedField}s
+	 */
 	@Nonnull
 	public static PreparedObject prepare(@Nonnull Object object) {
 		Class<?> clazz = object.getClass();
@@ -48,19 +62,20 @@ public class PreparedObject { // TODO doc
 			}
 		}
 
-		return new PreparedObject(clazz, object, fields);
+		return new PreparedObject(object, fields);
 	}
 
-	@Nonnull
-	public Class<?> getClazz() {
-		return clazz;
-	}
-
+	/**
+	 * @return All relevant fields of input object as {@link PreparedField}s
+	 */
 	@Nonnull
 	public List<PreparedField> getFields() {
 		return fields;
 	}
 
+	/**
+	 * @return The input objects
+	 */
 	@Nonnull
 	public Object getObject() {
 		return object;

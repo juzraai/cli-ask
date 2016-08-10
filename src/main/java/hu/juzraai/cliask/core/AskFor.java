@@ -16,6 +16,7 @@
 
 package hu.juzraai.cliask.core;
 
+import hu.juzraai.cliask.annotation.Ask;
 import hu.juzraai.cliask.convert.ConvertFailedException;
 import hu.juzraai.cliask.convert.Converter;
 
@@ -27,13 +28,65 @@ import java.util.Scanner;
  *
  * @author Zsolt Jurányi
  */
-public class AskFor { // TODO doc
+public class AskFor {
 
+	/**
+	 * Requests user input for every field in the given <code>Object</code>
+	 * argument which is annotated with {@link Ask}, and updates the object
+	 * using values got from user.
+	 * <p>
+	 * If a field has a non-null value, that will be treated as a default value.
+	 * If the user provides empty input for the field, it won't be modified.
+	 * <p>
+	 * If a field is <code>null</code>, user will be asked for it's value until
+	 * a non-empty input.
+	 * <p>
+	 * User's raw string input is converted into the type of the field using
+	 * {@link Converter}. By default, it chooses the appropriate converter from
+	 * the internal ones, but this can be overriden by specifying a converter
+	 * class in {@link Ask} annotation.
+	 * <p>
+	 * If any error occurs during conversion, user will be asked again for a
+	 * valid input value.
+	 * <p>
+	 * This method simply calls {@link #object(String, Object)} with
+	 * <code>null</code> as the <code>label</code> argument.
+	 *
+	 * @param object Object to be updated using user input
+	 * @param <T>    Type of the object
+	 * @return The object updated from user input
+	 */
 	@Nonnull
 	public static <T> T object(@Nonnull T object) {
 		return object(null, object);
 	}
 
+	/**
+	 * Requests user input for every field in the given <code>Object</code>
+	 * argument which is annotated with {@link Ask}, and updates the object
+	 * using values got from user.
+	 * <p>
+	 * If a field has a non-null value, that will be treated as a default value.
+	 * If the user provides empty input for the field, it won't be modified.
+	 * <p>
+	 * If a field is <code>null</code>, user will be asked for it's value until
+	 * a non-empty input.
+	 * <p>
+	 * User's raw string input is converted into the type of the field using
+	 * {@link Converter}. By default, it chooses the appropriate converter from
+	 * the internal ones, but this can be overriden by specifying a converter
+	 * class in {@link Ask} annotation.
+	 * <p>
+	 * If any error occurs during conversion, user will be asked again for a
+	 * valid input value.
+	 *
+	 * @param label  If it's not <code>null</code>, this will be printed out
+	 *               before asking for the field values, ":" will be appended to
+	 *               its end
+	 * @param object Object to be updated using user input
+	 * @param <T>    Type of the object
+	 * @return The object updated from user input
+	 */
 	@Nonnull
 	public static <T> T object(String label, @Nonnull T object) {
 
@@ -83,19 +136,46 @@ public class AskFor { // TODO doc
 		} while (repeat);
 	}
 
+	/**
+	 * Requests user input. Prints out a label in front of the input cursor.
+	 * If user only hits ENTER (or input string is empty after trimming), asks
+	 * the user again until a non-empty input.
+	 * <p>
+	 * This method simply calls {@link #string(String, String)} with
+	 * <code>null</code> as the default value argument.
+	 *
+	 * @param label Label to be printed out in front of input cursor, ":" will
+	 *              be appended to its end
+	 * @return The user's non-empty input
+	 */
 	@Nonnull
 	public static String string(@Nonnull String label) {
 		return string(label, null);
 	}
 
+	/**
+	 * Requests user input. Prints out a label in front of the input cursor.
+	 * If user only hits ENTER (or input string is empty after trimming) AND
+	 * default value is <code>null</code>, asks the user again until a non-empty
+	 * input. If the input is empty and there's a default value, returns the
+	 * default value.
+	 *
+	 * @param label        Label to be printed out in front of input cursor, ":"
+	 *                     will be appended to its end
+	 * @param defaultValue Default value to be used if user provides empty
+	 *                     input. If default value is <code>null</code>, user
+	 *                     will be asked again until a non-empty input.
+	 * @return The user's non-empty input, or the default value if it's not
+	 * <code>null</code>
+	 */
 	@Nonnull
-	public static String string(@Nonnull String name, String defaultValue) {
+	public static String string(@Nonnull String label, String defaultValue) {
 		// TODO: acceptEmpty option?
 
 		// build up output
 
 		StringBuilder s = new StringBuilder();
-		s.append(String.format("%n%40s", name));
+		s.append(String.format("%n%40s", label));
 		if (null != defaultValue) {
 			s.append(String.format("%n%40s", String.format("[default: '%s']", defaultValue)));
 		}
