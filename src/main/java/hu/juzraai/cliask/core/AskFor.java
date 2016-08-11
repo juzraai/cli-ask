@@ -24,7 +24,18 @@ import javax.annotation.Nonnull;
 import java.util.Scanner;
 
 /**
- * This is the place of CLI-Ask's main functions.
+ * This is the place of CLI-Ask's main functions, currently there are two main
+ * ones:
+ * <p>
+ * You can ask for a string using the {@link #string(String, String)} method.
+ * You must provide a label and you can specify a default value which will be
+ * returned if user gives empty input. Otherwise user is forced to provide
+ * non-empty input.
+ * <p>
+ * You can also ask for a POJO using {@link #object(String, Object)} method. You
+ * provide an object which has some fields annotated with {@link Ask}, and
+ * {@link AskFor} will ask the user for their values. The input string will be
+ * converted automatically to the field type using {@link Converter}.
  *
  * @author Zsolt Jurányi
  */

@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Prepares (an object for asking by preparing its fields via {@link
- * PreparedField}'s <code>prepare</code> method, and collecting relevant fields.
- * {@link PreparedObject} contains the input object itself, and it's
- * fields that needs to be asked.
+ * Prepares (creates interpreted version of) an object for asking by preparing
+ * its fields via {@link PreparedField}'s <code>prepare</code> method, and
+ * collecting relevant fields. {@link PreparedObject} contains the input object
+ * itself, and it's fields that needs to be asked.
  *
  * @author Zsolt Jurányi
  */
