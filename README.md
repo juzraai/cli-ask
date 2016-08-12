@@ -1,10 +1,6 @@
-# CLI-Ask [![Release](https://jitpack.io/v/juzraai/cli-ask.svg)](https://jitpack.io/#juzraai/cli-ask) [![Build status](https://travis-ci.org/juzraai/cli-ask.svg)](https://travis-ci.org/juzraai/cli-ask)
+# CLI-Ask [![Release](https://jitpack.io/v/juzraai/cli-ask.svg)](https://jitpack.io/#juzraai/cli-ask) [![Build Status](https://travis-ci.org/juzraai/cli-ask.svg?branch=master)](https://travis-ci.org/juzraai/cli-ask) [![codebeat badge](https://codebeat.co/badges/c08b14a9-8621-45f9-aef6-6c7823dfae1d)](https://codebeat.co/projects/github-com-juzraai-cli-ask)
 
 *Ask stuff from user in terminal - fill POJO w/ a single call*
-
----
-
-**[UNDER DEVELOPMENT]**
 
 ---
 
@@ -156,5 +152,5 @@ Check [quick example](#quick-usage-example) again, or you can test it by running
 * [#2](https://github.com/juzraai/cli-ask/issues/2) raw value validation - `@ValidateRawValue(class)`
 * [#2](https://github.com/juzraai/cli-ask/issues/2) (final, converted) value validation - `@ValidateValue(class)`
 * [#4](https://github.com/juzraai/cli-ask/issues/4) skip condition - e.g. skip asking GitHub repo if GitHub user is empty - `@Skip(class)`, `boolean skip(Object)`
-* recursive "asking" - go deeper in POJOs - `@AskRecursively`
+* [#7](https://github.com/juzraai/cli-ask/issues/7) recursive "asking" - go deeper in POJOs - `@AskRecursively`
 * colored output using [Jansi](https://github.com/fusesource/jansi)
