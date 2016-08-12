@@ -37,20 +37,21 @@ public class PreparedField {
 
 	private static final Logger L = LoggerFactory.getLogger(PreparedField.class);
 
-	private final Field field;
 	private final Object object;
-	private final boolean relevant;
-	private final String label;
-	private final Object defaultValue;
-	private final ConvertTo<?> converter;
+	private final Field field;
+	private boolean relevant;
+	private String label;
+	private Object defaultValue;
+	private ConvertTo<?> converter;
 
-	protected PreparedField(@Nonnull Field field, @Nonnull Object object, boolean relevant, @Nonnull String label, Object defaultValue, ConvertTo<?> converter) {
-		this.field = field;
+	public PreparedField(Object object, Field field) {
 		this.object = object;
-		this.relevant = relevant;
-		this.label = label;
-		this.defaultValue = defaultValue;
-		this.converter = converter;
+		this.field = field;
+	}
+
+	protected static ConvertTo<?> instantiateConverter(Ask ask) throws IllegalAccessException, InstantiationException {
+		Class<? extends ConvertTo<?>> converterClass = ask.converter();
+		return DefaultConverter.class.equals(converterClass) ? null : converterClass.newInstance();
 	}
 
 	/**
@@ -80,43 +81,27 @@ public class PreparedField {
 	 */
 	@Nonnull
 	public static PreparedField prepare(@Nonnull Field field, @Nonnull Object object) {
-		boolean relevant = true;
-		String label = field.getName();
-		Object defaultValue = null;
-		ConvertTo<?> converter = null;
-
+		PreparedField preparedField = new PreparedField(object, field);
 		try {
+			field.setAccessible(true); // throws SE
 
-			// relevance
 			Ask ask = field.getAnnotation(Ask.class);
-			relevant = null != ask && ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL);
+
+			preparedField.setRelevant(null != ask && ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL));
+
 			// TODO later: maybe we can check if there's proper converter or @AskRecursively
 
-			if (relevant) {
-				field.setAccessible(true); // throws SE
-
-				// label
-				if (!ask.value().isEmpty()) {
-					label = ask.value();
-				}
-
-				// default value
-				defaultValue = field.get(object); // throws IAE
-
-				// converter
-
-				Class<? extends ConvertTo<?>> converterClass = ask.converter();
-				if (!DefaultConverter.class.equals(converterClass)) {
-					converter = converterClass.newInstance(); // throws IE, IAE
-				}
+			if (preparedField.isRelevant()) {
+				preparedField.setConverter(instantiateConverter(ask)); // throws IE, IAE
+				preparedField.setDefaultValue(field.get(object)); // throws IAE
+				preparedField.setLabel(ask.value().trim().isEmpty() ? field.getName() : ask.value());
 			}
 		} catch (SecurityException | InstantiationException | IllegalAccessException e) {
 			L.warn("Error occurred while preparing field '{}' of class '{}': {}", field.getName(), object.getClass().getName(), e.getMessage());
 			L.trace("Stack trace", e);
-			relevant = false;
+			preparedField.setRelevant(false);
 		}
-
-		return new PreparedField(field, object, relevant, label, defaultValue, converter);
+		return preparedField;
 	}
 
 	/**
@@ -128,12 +113,20 @@ public class PreparedField {
 		return converter;
 	}
 
+	protected void setConverter(ConvertTo<?> converter) {
+		this.converter = converter;
+	}
+
 	/**
 	 * @return The default value of the field - the value of the field when
 	 * {@link #prepare(Field, Object)} was called
 	 */
 	public Object getDefaultValue() {
 		return defaultValue;
+	}
+
+	protected void setDefaultValue(Object defaultValue) {
+		this.defaultValue = defaultValue;
 	}
 
 	/**
@@ -153,6 +146,10 @@ public class PreparedField {
 		return label;
 	}
 
+	protected void setLabel(String label) {
+		this.label = label;
+	}
+
 	/**
 	 * @return The parent object
 	 */
@@ -166,6 +163,10 @@ public class PreparedField {
 	 */
 	public boolean isRelevant() {
 		return relevant;
+	}
+
+	protected void setRelevant(boolean relevant) {
+		this.relevant = relevant;
 	}
 
 	/**
@@ -186,4 +187,5 @@ public class PreparedField {
 			throw new IllegalStateException("set() called on irrelevant PreparedField");
 		}
 	}
+
 }
