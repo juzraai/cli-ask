@@ -83,15 +83,13 @@ public class PreparedField {
 	public static PreparedField prepare(@Nonnull Field field, @Nonnull Object object) {
 		PreparedField preparedField = new PreparedField(object, field);
 		try {
-			field.setAccessible(true); // throws SE
-
 			Ask ask = field.getAnnotation(Ask.class);
-
 			preparedField.setRelevant(null != ask && ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL));
 
-			// TODO later: maybe we can check if there's proper converter or @AskRecursively
+			// TODO select & store converter HERE, set relevant=false if no converter found!
 
 			if (preparedField.isRelevant()) {
+				field.setAccessible(true); // throws SE
 				preparedField.setConverter(instantiateConverter(ask)); // throws IE, IAE
 				preparedField.setDefaultValue(field.get(object)); // throws IAE
 				preparedField.setLabel(ask.value().trim().isEmpty() ? field.getName() : ask.value());

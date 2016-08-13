@@ -149,8 +149,8 @@ Check [quick example](#quick-usage-example) again, or you can test it by running
  
 * [#5](https://github.com/juzraai/cli-ask/issues/5) ask for simple objects
 * [#3](https://github.com/juzraai/cli-ask/issues/3) optional values - accept empty input
-* [#2](https://github.com/juzraai/cli-ask/issues/2) raw value validation - `@ValidateRawValue(class)`
-* [#2](https://github.com/juzraai/cli-ask/issues/2) (final, converted) value validation - `@ValidateValue(class)`
-* [#4](https://github.com/juzraai/cli-ask/issues/4) skip condition - e.g. skip asking GitHub repo if GitHub user is empty - `@Skip(class)`, `boolean skip(Object)`
-* [#7](https://github.com/juzraai/cli-ask/issues/7) recursive "asking" - go deeper in POJOs - `@AskRecursively`
+* [#2](https://github.com/juzraai/cli-ask/issues/2) raw value validation
+* [#2](https://github.com/juzraai/cli-ask/issues/2) (final, converted) value validation
+* [#4](https://github.com/juzraai/cli-ask/issues/4) skip condition - e.g. skip asking GitHub repo if GitHub user is empty
+* [#7](https://github.com/juzraai/cli-ask/issues/7) recursive "asking" - go deeper in POJOs
 * colored output using [Jansi](https://github.com/fusesource/jansi)

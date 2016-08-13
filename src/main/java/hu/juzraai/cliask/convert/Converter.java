@@ -90,17 +90,29 @@ public class Converter {
 	 */
 	@Nonnull
 	public static Object convert(@Nonnull String rawValue, @Nonnull Class<?> type, ConvertTo<?> converter) throws ConvertFailedException {
-		if (null != converter) {
-			return converter.convert(rawValue);
-		} else {
-			for (Map.Entry<Class<?>, ConvertTo<?>> entry : CONVERTERS.entrySet()) {
-				if (type.isAssignableFrom(entry.getKey())) {
-					return entry.getValue().convert(rawValue);
-				}
+		ConvertTo<?> c = null != converter ? converter : selectConverter(type);
+		if (null != c) {
+			return c.convert(rawValue);
+		}
+		throw new UnsupportedOperationException("No converter found for type: " + type.getName());
+	}
+
+	protected static ConvertTo<?> selectConverter(Class<?> type) {
+
+		// direct converter
+		if (CONVERTERS.containsKey(type)) {
+			return CONVERTERS.get(type);
+		}
+
+		// converter for type's child class
+		for (Map.Entry<Class<?>, ConvertTo<?>> entry : CONVERTERS.entrySet()) {
+			if (type.isAssignableFrom(entry.getKey())) {
+				return entry.getValue();
 			}
 		}
 
-		throw new UnsupportedOperationException("No converter found for type: " + type.getName());
+		// no converter found
+		return null;
 	}
 
 }
