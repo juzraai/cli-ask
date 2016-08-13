@@ -41,35 +41,16 @@ import java.util.Scanner;
  */
 public class AskFor {
 
-	/**
-	 * Requests user input for every field in the given <code>Object</code>
-	 * argument which is annotated with {@link Ask}, and updates the object
-	 * using values got from user.
-	 * <p>
-	 * If a field has a non-null value, that will be treated as a default value.
-	 * If the user provides empty input for the field, it won't be modified.
-	 * <p>
-	 * If a field is <code>null</code>, user will be asked for it's value until
-	 * a non-empty input.
-	 * <p>
-	 * User's raw string input is converted into the type of the field using
-	 * {@link Converter}. By default, it chooses the appropriate converter from
-	 * the internal ones, but this can be overriden by specifying a converter
-	 * class in {@link Ask} annotation.
-	 * <p>
-	 * If any error occurs during conversion, user will be asked again for a
-	 * valid input value.
-	 * <p>
-	 * This method simply calls {@link #object(String, Object)} with
-	 * <code>null</code> as the <code>label</code> argument.
-	 *
-	 * @param object Object to be updated using user input
-	 * @param <T>    Type of the object
-	 * @return The object updated from user input
-	 */
-	@Nonnull
-	public static <T> T object(@Nonnull T object) {
-		return object(null, object);
+	protected static String generatePrintedLabel(String label, String defaultValue) {
+		// TODO handle long label - insert \n-s after every 40th char
+		// TODO handle multiline label - split by \n, append every line in %n%40s
+		StringBuilder s = new StringBuilder();
+		s.append(String.format("%n%40s", label));
+		if (null != defaultValue) {
+			s.append(String.format("%n%40s", String.format("[default: '%s']", defaultValue)));
+		}
+		s.append(" : ");
+		return s.toString();
 	}
 
 	/**
@@ -122,6 +103,37 @@ public class AskFor {
 		return object;
 	}
 
+	/**
+	 * Requests user input for every field in the given <code>Object</code>
+	 * argument which is annotated with {@link Ask}, and updates the object
+	 * using values got from user.
+	 * <p>
+	 * If a field has a non-null value, that will be treated as a default value.
+	 * If the user provides empty input for the field, it won't be modified.
+	 * <p>
+	 * If a field is <code>null</code>, user will be asked for it's value until
+	 * a non-empty input.
+	 * <p>
+	 * User's raw string input is converted into the type of the field using
+	 * {@link Converter}. By default, it chooses the appropriate converter from
+	 * the internal ones, but this can be overriden by specifying a converter
+	 * class in {@link Ask} annotation.
+	 * <p>
+	 * If any error occurs during conversion, user will be asked again for a
+	 * valid input value.
+	 * <p>
+	 * This method simply calls {@link #object(String, Object)} with
+	 * <code>null</code> as the <code>label</code> argument.
+	 *
+	 * @param object Object to be updated using user input
+	 * @param <T>    Type of the object
+	 * @return The object updated from user input
+	 */
+	@Nonnull
+	public static <T> T object(@Nonnull T object) {
+		return object(null, object);
+	}
+
 	protected static void preparedField(@Nonnull PreparedField field) {
 		String dv = null == field.getDefaultValue() ? null : field.getDefaultValue().toString();
 		boolean repeat;
@@ -149,23 +161,6 @@ public class AskFor {
 
 	/**
 	 * Requests user input. Prints out a label in front of the input cursor.
-	 * If user only hits ENTER (or input string is empty after trimming), asks
-	 * the user again until a non-empty input.
-	 * <p>
-	 * This method simply calls {@link #string(String, String)} with
-	 * <code>null</code> as the default value argument.
-	 *
-	 * @param label Label to be printed out in front of input cursor, ":" will
-	 *              be appended to its end
-	 * @return The user's non-empty input
-	 */
-	@Nonnull
-	public static String string(@Nonnull String label) {
-		return string(label, null);
-	}
-
-	/**
-	 * Requests user input. Prints out a label in front of the input cursor.
 	 * If user only hits ENTER (or input string is empty after trimming) AND
 	 * default value is <code>null</code>, asks the user again until a non-empty
 	 * input. If the input is empty and there's a default value, returns the
@@ -185,12 +180,7 @@ public class AskFor {
 
 		// build up output
 
-		StringBuilder s = new StringBuilder();
-		s.append(String.format("%n%40s", label));
-		if (null != defaultValue) {
-			s.append(String.format("%n%40s", String.format("[default: '%s']", defaultValue)));
-		}
-		s.append(" : ");
+		String printedLabel = generatePrintedLabel(label, defaultValue);
 
 		// ask for value
 
@@ -199,7 +189,7 @@ public class AskFor {
 		boolean repeat;
 		do {
 			repeat = false;
-			System.out.print(s.toString());
+			System.out.print(printedLabel);
 			value = input.nextLine().trim();
 			if (value.isEmpty() && null == defaultValue) {
 				repeat = true;
@@ -208,5 +198,22 @@ public class AskFor {
 		} while (repeat);
 
 		return value.isEmpty() ? defaultValue : value;
+	}
+
+	/**
+	 * Requests user input. Prints out a label in front of the input cursor.
+	 * If user only hits ENTER (or input string is empty after trimming), asks
+	 * the user again until a non-empty input.
+	 * <p>
+	 * This method simply calls {@link #string(String, String)} with
+	 * <code>null</code> as the default value argument.
+	 *
+	 * @param label Label to be printed out in front of input cursor, ":" will
+	 *              be appended to its end
+	 * @return The user's non-empty input
+	 */
+	@Nonnull
+	public static String string(@Nonnull String label) {
+		return string(label, null);
 	}
 }
