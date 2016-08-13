@@ -139,18 +139,85 @@ You can try it yourself by running `main` method of `hu.juzraai.cliask.example.S
 
 **TODO: how to define class, how AskFor.object works, 2 way to add converters**
 
-Check [quick example](#quick-usage-example) again, or you can test it by running `main` method of `hu.juzraai.cliask.example.PojoInput`.
- 
+
+### Basic steps
+
+1. **Define a data class** and add `@Ask` annotation for fields you want to ask from user. You can specify a custom label for each field here and also you can set a custom converter class.
+2. **Call `AskFor.object`** and pass an instance of your data class to update it using user input.
+
+And that's all! Check the [quick example](#quick-usage-example) on the top. You can test it by running `main` method of `hu.juzraai.cliask.example.PojoInput`.
+
+
+### How it works
+
+Let's see what happens when you call `AskFor.object(object)`:
+
+1. Firstly, it **prepares your object** using `PreparedObject.prepare` method.
+    * It constructs a `PreparedObject` instance which contains the original object itself and the list of the object's prepared and relevant fields.
+    * Each field of the object is prepared using `PreparedField.prepare` method which returns a `PreparedField` object.
+    * Prepared fields contain:
+        * the original parent object
+        * the `Field` itself
+        * a boolean telling **whether the field is relevant** for asking: a field is relevant if it's accessible, not final and has `@Ask` annotation
+        * the **default value**: the field's value got from the original object
+        * the **label** to be printed out in front of the input cursor when asking the user: it's the field name unless you specify a custom label in the annotation: `@Ask("My custom label")` or `@Ask(value = "My custom label", ...)`
+        * and the instance of the **custom converter** class if it's specified in the annotation: `@Ask(converter = MyConverter.class)`
+    * So once again, the prepared object contains only the **relevant fields**.
+2. Then it goes through these relevant fields and asks them:
+    * Calls `AskFor.string(label, defaultValue)` ([see above](#simple-input)) to get the **raw value from user**. Uses the default value's `toString` method to pass it to `string()`.
+    * If the received value is the default value, all further processing is skipped.
+    * Calls `Converter.convert(raw, type, customConverter)` method to **convert** the raw value into the type of the field.
+    * Then **sets this new value** for the field.
+    * If conversion fails, it prints out and error messages and starts over by **asking** for the field's value **again**.
+
+
+### Converting
+
+So as you may see, there's two kind of converting:
+
+* One with the custom converter explicitly specified in a field's `@Ask` annotation,
+* and the other is the magic under the hood, which I'm going to explain hereafter.
+
+`Converter` class has a pool for converters, which is a `Map< Class<?>, ConvertTo<?> >`.
+
+The `addConverter(Class<T>, ConvertTo<T>)` ensures that if you add a converter for a type, the converter must convert to that type.
+
+When `convert(raw, type, customConverter)` receives no custom converter it does a search for the appropriate converter:
+
+* First, it uses the map's `contains` and `get` method to fastly return the **perfect converter**, if any.
+* If it fails, iterates through the entries and returns with the first converter which **converts to a type assignable to the target type**. So if the field type is `ClassA`, `ClassB` extends `ClassA`, and there's a converter for `ClassB` it will be returned.
+
+To create your custom converter, define a class as follows:
+
+```java
+public class ConvertToTargetType implements ConvertTo<TargetType> {
+
+    @Nonnull
+    @Override
+    public TargetType convert(@Nonnull String rawValue) throws ConvertFailedException {
+        // construct and return a TargetType instance
+        // catch any error and throw ConvertFailedException
+    }
+}
+```
+
+And finally you can use it in two-ways:
+
+* By adding to the converter pool: `Converter.addConverter(TargetType.class, new ConvertToTargetType())`
+* By choosing it for a field: `@Ask(converter = ConvertToTargetType.class)` - in this case, make sure it can be instantiated with a **no-arg constructor**!
+
 
 
 # Version history
- 
+
 # Future ideas
- 
+
+* [#9](https://github.com/juzraai/cli-ask/issues/9) select converter earlier
+* [#10](https://github.com/juzraai/cli-ask/issues/10) handle long/multiline labels
 * [#5](https://github.com/juzraai/cli-ask/issues/5) ask for simple objects
-* [#3](https://github.com/juzraai/cli-ask/issues/3) optional values - accept empty input
 * [#2](https://github.com/juzraai/cli-ask/issues/2) raw value validation
 * [#2](https://github.com/juzraai/cli-ask/issues/2) (final, converted) value validation
 * [#4](https://github.com/juzraai/cli-ask/issues/4) skip condition - e.g. skip asking GitHub repo if GitHub user is empty
 * [#7](https://github.com/juzraai/cli-ask/issues/7) recursive "asking" - go deeper in POJOs
+* [#3](https://github.com/juzraai/cli-ask/issues/3) optional values - accept empty input
 * colored output using [Jansi](https://github.com/fusesource/jansi)
