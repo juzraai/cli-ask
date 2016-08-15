@@ -111,6 +111,7 @@ public class PreparedField {
 					preparedField.field.getType().getName(),
 					preparedField.field.getName()));
 		}
+		// TODO verify custom converter class' generic type
 		return converter;
 	}
 

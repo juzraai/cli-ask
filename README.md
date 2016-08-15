@@ -158,15 +158,15 @@ Let's see what happens when you call `AskFor.object(object)`:
     * Prepared fields contain:
         * the original parent object
         * the `Field` itself
-        * a boolean telling **whether the field is relevant** for asking: a field is relevant if it's accessible, not final and has `@Ask` annotation
         * the **default value**: the field's value got from the original object
         * the **label** to be printed out in front of the input cursor when asking the user: it's the field name unless you specify a custom label in the annotation: `@Ask("My custom label")` or `@Ask(value = "My custom label", ...)`
-        * and the instance of the **custom converter** class if it's specified in the annotation: `@Ask(converter = MyConverter.class)`
-    * So once again, the prepared object contains only the **relevant fields**.
+        * the converter instance to be used: this can be the **custom converter** class if it's specified in the annotation: `@Ask(converter = MyConverter.class)`, or the automatically selected converter from the internal pool (see [below](#converting))
+        * a boolean telling **whether the field is relevant** for asking: a field is relevant if it's accessible, not final, has `@Ask` annotation, no error occurred when extracting data from the `Field` object, and there's an appropriate converter
+    * So once again, the prepared object contains **only the relevant fields**.
 2. Then it goes through these relevant fields and asks them:
     * Calls `AskFor.string(label, defaultValue)` ([see above](#simple-input)) to get the **raw value from user**. Uses the default value's `toString` method to pass it to `string()`.
     * If the received value is the default value, all further processing is skipped.
-    * Calls `Converter.convert(raw, type, customConverter)` method to **convert** the raw value into the type of the field.
+    * Calls the convert method of the prepared field's converter instance to **convert** the raw value into the type of the field.
     * Then **sets this new value** for the field.
     * If conversion fails, it prints out and error messages and starts over by **asking** for the field's value **again**.
 
