@@ -18,7 +18,7 @@ package hu.juzraai.cliask.core;
 
 import hu.juzraai.cliask.annotation.Ask;
 import hu.juzraai.cliask.convert.ConvertFailedException;
-import hu.juzraai.cliask.convert.Converter;
+import hu.juzraai.cliask.convert.Converters;
 
 import javax.annotation.Nonnull;
 import java.util.Scanner;
@@ -35,7 +35,7 @@ import java.util.Scanner;
  * You can also ask for a POJO using {@link #object(String, Object)} method. You
  * provide an object which has some fields annotated with {@link Ask}, and
  * {@link AskFor} will ask the user for their values. The input string will be
- * converted automatically to the field type using {@link Converter}.
+ * converted automatically to the field type using {@link Converters}.
  *
  * @author Zsolt Jurányi
  */
@@ -65,7 +65,7 @@ public class AskFor {
 	 * a non-empty input.
 	 * <p>
 	 * User's raw string input is converted into the type of the field using
-	 * {@link Converter}. By default, it chooses the appropriate converter from
+	 * {@link Converters}. By default, it chooses the appropriate converter from
 	 * the internal ones, but this can be overriden by specifying a converter
 	 * class in {@link Ask} annotation.
 	 * <p>
@@ -118,7 +118,7 @@ public class AskFor {
 	 * a non-empty input.
 	 * <p>
 	 * User's raw string input is converted into the type of the field using
-	 * {@link Converter}. By default, it chooses the appropriate converter from
+	 * {@link Converters}. By default, it chooses the appropriate converter from
 	 * the internal ones, but this can be overriden by specifying a converter
 	 * class in {@link Ask} annotation.
 	 * <p>

@@ -18,7 +18,7 @@ package hu.juzraai.cliask.core;
 
 import hu.juzraai.cliask.annotation.Ask;
 import hu.juzraai.cliask.convert.ConvertTo;
-import hu.juzraai.cliask.convert.Converter;
+import hu.juzraai.cliask.convert.Converters;
 import hu.juzraai.cliask.convert.DefaultConverter;
 import hu.juzraai.toolbox.log.LoggerFactory;
 import org.slf4j.Logger;
@@ -70,7 +70,7 @@ public class PreparedField {
 	 * Finally, if a converter class is specified in {@link Ask} annotation, it
 	 * will be instantiated here and stored in the result {@link PreparedField}
 	 * object, otherwise an appropriate converter will be selected using
-	 * {@link Converter} class.
+	 * {@link Converters} class.
 	 * <p>
 	 * If no converter found or any error occurs during field inspection, the
 	 * field will be irrelevant and skipped from asking.
@@ -104,7 +104,7 @@ public class PreparedField {
 	@Nonnull
 	protected static ConvertTo<?> provideConverter(@Nonnull PreparedField preparedField, @Nonnull Ask ask) throws IllegalAccessException, InstantiationException, NoSuchAlgorithmException {
 		ConvertTo<?> converter = DefaultConverter.class.equals(ask.converter())
-				? Converter.selectConverter(preparedField.field.getType())
+				? Converters.find(preparedField.field.getType())
 				: ask.converter().newInstance();
 		if (null == converter) {
 			throw new NoSuchAlgorithmException(String.format("No converter found for type %s (field: %s)",

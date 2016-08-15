@@ -17,7 +17,7 @@
 package hu.juzraai.cliask.annotation;
 
 import hu.juzraai.cliask.convert.ConvertTo;
-import hu.juzraai.cliask.convert.Converter;
+import hu.juzraai.cliask.convert.Converters;
 import hu.juzraai.cliask.convert.DefaultConverter;
 import hu.juzraai.cliask.core.AskFor;
 
@@ -45,9 +45,9 @@ import java.lang.annotation.Target;
 public @interface Ask {
 
 	/**
-	 * {@link AskFor} calls {@link Converter} to convert the raw input string
+	 * {@link AskFor} calls {@link Converters} to convert the raw input string
 	 * into the type of the field. By default, the converter is chosen by {@link
-	 * Converter}, but you can override it by specifying a converter class in
+	 * Converters}, but you can override it by specifying a converter class in
 	 * this attribute.
 	 *
 	 * @return Converter class to be used; if it's {@link DefaultConverter} it

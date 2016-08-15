@@ -21,7 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * Converter engine used in CLI-Ask, to convert String input into various types.
+ * Converter pool used in CLI-Ask, to convert String input into various types.
  * It holds a Map of converters where key is the target type and value is the
  * appropriate converter instance.
  * <p>
@@ -30,36 +30,38 @@ import java.util.Map;
  * <p>
  * Of course, default converters can be overriden and new (type,converter) pairs
  * can be added.
+ * <p>
+ * It has a method which can find an appropriate converter for a given type.
  *
  * @author Zsolt Jurányi
  */
-public class Converter {
+public class Converters {
 
 	private static final Map<Class<?>, ConvertTo<?>> CONVERTERS = new LinkedHashMap<>();
 
 	static {
 		// string (NOP)
-		addConverter(String.class, new ConvertToString());
+		add(String.class, new ConvertToString());
 
 		// integers
-		addConverter(Byte.TYPE, new ConvertToByte());
-		addConverter(Byte.class, new ConvertToByte());
-		addConverter(Short.TYPE, new ConvertToShort());
-		addConverter(Short.class, new ConvertToShort());
-		addConverter(Integer.TYPE, new ConvertToInteger());
-		addConverter(Integer.class, new ConvertToInteger());
-		addConverter(Long.TYPE, new ConvertToLong());
-		addConverter(Long.class, new ConvertToLong());
+		add(Byte.TYPE, new ConvertToByte());
+		add(Byte.class, new ConvertToByte());
+		add(Short.TYPE, new ConvertToShort());
+		add(Short.class, new ConvertToShort());
+		add(Integer.TYPE, new ConvertToInteger());
+		add(Integer.class, new ConvertToInteger());
+		add(Long.TYPE, new ConvertToLong());
+		add(Long.class, new ConvertToLong());
 
 		// floats
-		addConverter(Float.TYPE, new ConvertToFloat());
-		addConverter(Float.class, new ConvertToFloat());
-		addConverter(Double.TYPE, new ConvertToDouble());
-		addConverter(Double.class, new ConvertToDouble());
+		add(Float.TYPE, new ConvertToFloat());
+		add(Float.class, new ConvertToFloat());
+		add(Double.TYPE, new ConvertToDouble());
+		add(Double.class, new ConvertToDouble());
 
 		// boolean
-		addConverter(Boolean.TYPE, new ConvertToBoolean());
-		addConverter(Boolean.class, new ConvertToBoolean());
+		add(Boolean.TYPE, new ConvertToBoolean());
+		add(Boolean.class, new ConvertToBoolean());
 	}
 
 	/**
@@ -69,7 +71,7 @@ public class Converter {
 	 * @param converter Converter instance
 	 * @param <T>       Target type of the converter
 	 */
-	public static <T> void addConverter(@Nonnull Class<T> type, @Nonnull ConvertTo<T> converter) {
+	public static <T> void add(@Nonnull Class<T> type, @Nonnull ConvertTo<T> converter) {
 		CONVERTERS.put(type, converter);
 	}
 
@@ -90,7 +92,7 @@ public class Converter {
 	 * <code>String</code> to the given type, if any, or <code>null</code> if no
 	 * appropriate converter found
 	 */
-	public static ConvertTo<?> selectConverter(Class<?> type) {
+	public static ConvertTo<?> find(Class<?> type) {
 
 		// perfect converter
 		if (CONVERTERS.containsKey(type)) {
