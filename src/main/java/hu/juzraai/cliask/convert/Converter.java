@@ -20,7 +20,6 @@ import javax.annotation.Nonnull;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-
 /**
  * Converter engine used in CLI-Ask, to convert String input into various types.
  * It holds a Map of converters where key is the target type and value is the
@@ -75,31 +74,25 @@ public class Converter {
 	}
 
 	/**
-	 * Converts the given string into the given target type. If third argument
-	 * is non-null, uses that as converter, otherwise tries to find converter
-	 * from the internal storage.
+	 * Tries to find an appropriate converter in the internal storage for the
+	 * given type.
 	 * <p>
-	 * If no proper converter was found, throws {@link UnsupportedOperationException}.
+	 * First, it uses the map's <code>contains</code> and <code>get</code>
+	 * method to fastly return the perfect converter, if any. If it fails,
+	 * iterates through the entries and returns with the first converter which
+	 * converts to a type assignable to the target type. So if the field
+	 * type is <code>ClassA</code>, <code>ClassB</code> extends
+	 * <code>ClassA</code>, and there's a  converter for <code>ClassB</code>
+	 * it will be returned.
 	 *
-	 * @param rawValue  Input string value to be converted
-	 * @param type      Target type
-	 * @param converter Optional converter to be used instead of internal
-	 *                  converters
-	 * @return The result of the conversion
-	 * @throws ConvertFailedException If conversion fails
+	 * @param type Type to search converter for
+	 * @return An appropriate converter instance which converts from
+	 * <code>String</code> to the given type, if any, or <code>null</code> if no
+	 * appropriate converter found
 	 */
-	@Nonnull
-	public static Object convert(@Nonnull String rawValue, @Nonnull Class<?> type, ConvertTo<?> converter) throws ConvertFailedException {
-		ConvertTo<?> c = null != converter ? converter : selectConverter(type);
-		if (null != c) {
-			return c.convert(rawValue);
-		}
-		throw new UnsupportedOperationException("No converter found for type: " + type.getName());
-	}
+	public static ConvertTo<?> selectConverter(Class<?> type) {
 
-	protected static ConvertTo<?> selectConverter(Class<?> type) {
-
-		// direct converter
+		// perfect converter
 		if (CONVERTERS.containsKey(type)) {
 			return CONVERTERS.get(type);
 		}

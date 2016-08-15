@@ -18,6 +18,7 @@ package hu.juzraai.cliask.core;
 
 import hu.juzraai.cliask.annotation.Ask;
 import hu.juzraai.cliask.convert.ConvertTo;
+import hu.juzraai.cliask.convert.Converter;
 import hu.juzraai.cliask.convert.DefaultConverter;
 import hu.juzraai.toolbox.log.LoggerFactory;
 import org.slf4j.Logger;
@@ -25,11 +26,12 @@ import org.slf4j.Logger;
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Prepares (creates interpreted version of) an object's field by deciding
- * whether it's relevant for asking, determining label and default value,
- * constructing explicitly specified converter if any.
+ * whether it's relevant for asking, determining label, default value, and
+ * providing converter instance.
  *
  * @author Zsolt Jurányi
  */
@@ -47,11 +49,6 @@ public class PreparedField {
 	public PreparedField(Object object, Field field) {
 		this.object = object;
 		this.field = field;
-	}
-
-	protected static ConvertTo<?> instantiateConverter(Ask ask) throws IllegalAccessException, InstantiationException {
-		Class<? extends ConvertTo<?>> converterClass = ask.converter();
-		return DefaultConverter.class.equals(converterClass) ? null : converterClass.newInstance();
 	}
 
 	/**
@@ -72,7 +69,11 @@ public class PreparedField {
 	 * <p>
 	 * Finally, if a converter class is specified in {@link Ask} annotation, it
 	 * will be instantiated here and stored in the result {@link PreparedField}
-	 * object.
+	 * object, otherwise an appropriate converter will be selected using
+	 * {@link Converter} class.
+	 * <p>
+	 * If no converter found or any error occurs during field inspection, the
+	 * field will be irrelevant and skipped from asking.
 	 *
 	 * @param field  Field to be prepared
 	 * @param object Parent object (needed for get/set operations)
@@ -86,20 +87,31 @@ public class PreparedField {
 			Ask ask = field.getAnnotation(Ask.class);
 			preparedField.setRelevant(null != ask && ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL));
 
-			// TODO select & store converter HERE, set relevant=false if no converter found!
-
 			if (preparedField.isRelevant()) {
 				field.setAccessible(true); // throws SE
-				preparedField.setConverter(instantiateConverter(ask)); // throws IE, IAE
+				preparedField.setConverter(provideConverter(preparedField, ask));
 				preparedField.setDefaultValue(field.get(object)); // throws IAE
 				preparedField.setLabel(ask.value().trim().isEmpty() ? field.getName() : ask.value());
 			}
-		} catch (SecurityException | InstantiationException | IllegalAccessException e) {
+		} catch (SecurityException | InstantiationException | IllegalAccessException | NoSuchAlgorithmException e) {
 			L.warn("Error occurred while preparing field '{}' of class '{}': {}", field.getName(), object.getClass().getName(), e.getMessage());
 			L.trace("Stack trace", e);
 			preparedField.setRelevant(false);
 		}
 		return preparedField;
+	}
+
+	@Nonnull
+	protected static ConvertTo<?> provideConverter(@Nonnull PreparedField preparedField, @Nonnull Ask ask) throws IllegalAccessException, InstantiationException, NoSuchAlgorithmException {
+		ConvertTo<?> converter = DefaultConverter.class.equals(ask.converter())
+				? Converter.selectConverter(preparedField.field.getType())
+				: ask.converter().newInstance();
+		if (null == converter) {
+			throw new NoSuchAlgorithmException(String.format("No converter found for type %s (field: %s)",
+					preparedField.field.getType().getName(),
+					preparedField.field.getName()));
+		}
+		return converter;
 	}
 
 	/**

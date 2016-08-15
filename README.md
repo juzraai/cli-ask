@@ -210,6 +210,13 @@ And finally you can use it in two-ways:
 
 # Version history
 
+Version   | Status               | Description
+----------|----------------------|------------
+  1.1.0   | snapshot in `master` | Converter selection in prepare phase
+**1.0.0** | **current stable**   | Basic features: ask for string, ask for object, `@Ask` field annotation, labels, converting.
+
+
+
 # Future ideas
 
 * [#9](https://github.com/juzraai/cli-ask/issues/9) select converter earlier

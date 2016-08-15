@@ -71,6 +71,9 @@ public class AskFor {
 	 * <p>
 	 * If any error occurs during conversion, user will be asked again for a
 	 * valid input value.
+	 * <p>
+	 * If no appropriate converter was found or something went bad when
+	 * inspecting an input field, that field will be skipped from asking.
 	 *
 	 * @param label  If it's not <code>null</code>, this will be printed out
 	 *               before asking for the field values, ":" will be appended to
@@ -122,6 +125,9 @@ public class AskFor {
 	 * If any error occurs during conversion, user will be asked again for a
 	 * valid input value.
 	 * <p>
+	 * If no appropriate converter was found or something went bad when
+	 * inspecting an input field, that field will be skipped from asking.
+	 * <p>
 	 * This method simply calls {@link #object(String, Object)} with
 	 * <code>null</code> as the <code>label</code> argument.
 	 *
@@ -146,7 +152,7 @@ public class AskFor {
 
 					// TODO later: use raw value validator specified on field
 
-					value = Converter.convert(rawValue, field.getField().getType(), field.getConverter());
+					value = field.getConverter().convert(rawValue);
 
 					// TODO later: use value validator specified on field
 
