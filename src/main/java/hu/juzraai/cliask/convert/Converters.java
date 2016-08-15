@@ -16,6 +16,7 @@
 
 package hu.juzraai.cliask.convert;
 
+import javax.annotation.CheckForNull;
 import javax.annotation.Nonnull;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -68,10 +69,11 @@ public class Converters {
 	 * Adds (or replaces) converter for the given type.
 	 *
 	 * @param type      Target type of the converter
-	 * @param converter Converter instance
+	 * @param converter Converter instance which converts to the target type, or
+	 *                  to a type which extends target type
 	 * @param <T>       Target type of the converter
 	 */
-	public static <T> void add(@Nonnull Class<T> type, @Nonnull ConvertTo<T> converter) {
+	public static <T> void add(@Nonnull Class<T> type, @Nonnull ConvertTo<? extends T> converter) {
 		CONVERTERS.put(type, converter);
 	}
 
@@ -92,7 +94,8 @@ public class Converters {
 	 * <code>String</code> to the given type, if any, or <code>null</code> if no
 	 * appropriate converter found
 	 */
-	public static ConvertTo<?> find(Class<?> type) {
+	@CheckForNull
+	public static ConvertTo<?> find(@Nonnull Class<?> type) {
 
 		// perfect converter
 		if (CONVERTERS.containsKey(type)) {

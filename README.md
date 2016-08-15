@@ -178,11 +178,11 @@ So as you may see, there's two kind of converting:
 * One with the custom converter explicitly specified in a field's `@Ask` annotation,
 * and the other is the magic under the hood, which I'm going to explain hereafter.
 
-`Converter` class has a pool for converters, which is a `Map< Class<?>, ConvertTo<?> >`.
+`Converters` class has a pool for converters, which is a `Map< Class<?>, ConvertTo<?> >`.
 
-The `addConverter(Class<T>, ConvertTo<T>)` ensures that if you add a converter for a type, the converter must convert to that type.
+The `add(Class<T>, ConvertTo<T>)` ensures that if you add a converter for a target type, it must convert to the target type or a type which extends it.
 
-When `convert(raw, type, customConverter)` receives no custom converter it does a search for the appropriate converter:
+Also there's a `find(Class<?> type)` method which tries to find an appropriate converter for the given type:
 
 * First, it uses the map's `contains` and `get` method to fastly return the **perfect converter**, if any.
 * If it fails, iterates through the entries and returns with the first converter which **converts to a type assignable to the target type**. So if the field type is `ClassA`, `ClassB` extends `ClassA`, and there's a converter for `ClassB` it will be returned.
@@ -219,7 +219,6 @@ Version   | Status               | Description
 
 # Future ideas
 
-* [#9](https://github.com/juzraai/cli-ask/issues/9) select converter earlier
 * [#10](https://github.com/juzraai/cli-ask/issues/10) handle long/multiline labels
 * [#5](https://github.com/juzraai/cli-ask/issues/5) ask for simple objects
 * [#2](https://github.com/juzraai/cli-ask/issues/2) raw value validation
