@@ -39,7 +39,9 @@ import java.util.Scanner;
  *
  * @author Zsolt Jurányi
  */
-public class AskFor {
+public class AskFor { // TODO doc: about recursive
+
+	// TODO README: about recursive
 
 	protected static String generatePrintedLabel(String label, String defaultValue) {
 		// TODO handle long label - insert \n-s after every 40th char
@@ -83,7 +85,7 @@ public class AskFor {
 	 * @return The object updated from user input
 	 */
 	@Nonnull
-	public static <T> T object(String label, @Nonnull T object) {
+	public static <T> T object(String label, @Nonnull T object) { // TODO doc: about recursive
 
 		// parse metadata
 		PreparedObject preparedObject = PreparedObject.prepare(object);
@@ -136,33 +138,36 @@ public class AskFor {
 	 * @return The object updated from user input
 	 */
 	@Nonnull
-	public static <T> T object(@Nonnull T object) {
+	public static <T> T object(@Nonnull T object) { // TODO doc: about recursive
 		return object(null, object);
 	}
 
-	protected static void preparedField(@Nonnull PreparedField field) {
-		String dv = null == field.getDefaultValue() ? null : field.getDefaultValue().toString();
-		boolean repeat;
-		Object value = null;
-		do {
-			repeat = false;
-			String rawValue = string(field.getLabel(), dv);
-			try {
-				if (!rawValue.equals(dv)) { // no need to process default value
+	protected static void preparedField(@Nonnull PreparedField preparedField) {
+		if (preparedField.isRecursive()) { // avoiding of infinite loops handled in prepare
+			object(preparedField.getLabel(), preparedField.getDefaultValue());
+		} else {
+			String dv = null == preparedField.getDefaultValue() ? null : preparedField.getDefaultValue().toString();
+			boolean repeat;
+			do {
+				repeat = false;
+				String rawValue = string(preparedField.getLabel(), dv);
+				try {
+					if (!rawValue.equals(dv)) { // no need to process default value
 
-					// TODO later: use raw value validator specified on field
+						// TODO later: use raw value validator specified on field
 
-					value = field.getConverter().convert(rawValue);
+						Object value = preparedField.getConverter().convert(rawValue);
 
-					// TODO later: use value validator specified on field
+						// TODO later: use value validator specified on field
 
-					field.set(value);
+						preparedField.set(value);
+					}
+				} catch (Exception e) {
+					repeat = e instanceof ConvertFailedException; // TODO later: or validation exceptions
+					System.out.printf("%40s   %s%n", "", e.getMessage());
 				}
-			} catch (Exception e) {
-				repeat = e instanceof ConvertFailedException; // TODO later: or validation exceptions
-				System.out.printf("%40s   %s%n", "", e.getMessage());
-			}
-		} while (repeat);
+			} while (repeat);
+		}
 	}
 
 	/**

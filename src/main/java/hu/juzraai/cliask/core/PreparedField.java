@@ -41,14 +41,32 @@ public class PreparedField {
 
 	private final Object object;
 	private final Field field;
+	private final Ask ask;
+	private boolean recursive;
 	private boolean relevant;
 	private String label;
 	private Object defaultValue;
 	private ConvertTo<?> converter;
 
-	public PreparedField(Object object, Field field) {
+	public PreparedField(@Nonnull Object object, @Nonnull Field field, Ask ask) {
 		this.object = object;
 		this.field = field;
+		this.ask = ask;
+	}
+
+	private static void determineRelevance(@Nonnull PreparedField preparedField) {
+		preparedField.relevant = null != preparedField.ask && ((preparedField.field.getModifiers() & Modifier.FINAL) != Modifier.FINAL);
+	}
+
+	private static void extractDefaultValue(@Nonnull PreparedField preparedField) throws IllegalAccessException {
+		try {
+			preparedField.field.setAccessible(true); // throws SE
+			preparedField.defaultValue = preparedField.field.get(preparedField.object); // throws IAE
+		} catch (Exception e) {
+			IllegalAccessException t = new IllegalAccessException("Failed to get value of field");
+			t.initCause(e);
+			throw t;
+		}
 	}
 
 	/**
@@ -81,38 +99,77 @@ public class PreparedField {
 	 * object, the label, the default value and the converter instance
 	 */
 	@Nonnull
-	public static PreparedField prepare(@Nonnull Field field, @Nonnull Object object) {
-		PreparedField preparedField = new PreparedField(object, field);
+	public static PreparedField prepare(@Nonnull Field field, @Nonnull Object object) { // TODO doc: about recursive
+		Ask ask = field.getAnnotation(Ask.class);
+		PreparedField preparedField = new PreparedField(object, field, ask);
 		try {
-			Ask ask = field.getAnnotation(Ask.class);
-			preparedField.setRelevant(null != ask && ((field.getModifiers() & Modifier.FINAL) != Modifier.FINAL));
-
-			if (preparedField.isRelevant()) {
-				field.setAccessible(true); // throws SE
-				preparedField.setConverter(provideConverter(preparedField, ask));
-				preparedField.setDefaultValue(field.get(object)); // throws IAE
-				preparedField.setLabel(ask.value().trim().isEmpty() ? field.getName() : ask.value());
+			determineRelevance(preparedField);
+			if (preparedField.relevant) {
+				extractDefaultValue(preparedField); // throws IAE
+				if (ask.recursive()) {
+					preparedField.recursive = true;
+					prepareRecursiveField(preparedField); // throws IAE, IE
+				} else {
+					prepareNonRecursiveField(preparedField); // throws IAE, IE, NSAE
+				}
 			}
-		} catch (SecurityException | InstantiationException | IllegalAccessException | NoSuchAlgorithmException e) {
+		} catch (Exception e) {
 			L.warn("Error occurred while preparing field '{}' of class '{}': {}", field.getName(), object.getClass().getName(), e.getMessage());
 			L.trace("Stack trace", e);
-			preparedField.setRelevant(false);
+			preparedField.relevant = false; // field will be skipped silently
 		}
 		return preparedField;
 	}
 
+	private static void prepareNonRecursiveField(@Nonnull PreparedField preparedField) throws IllegalAccessException, NoSuchAlgorithmException, InstantiationException {
+		Ask ask = preparedField.ask;
+
+		// get converter
+		preparedField.converter = provideConverter(preparedField, ask); // throws IAE, IE, NSAE
+
+		// generate label
+		preparedField.label = ask.value().trim().isEmpty() ? preparedField.field.getName() : ask.value();
+	}
+
+	private static void prepareRecursiveField(@Nonnull PreparedField preparedField) throws InstantiationException, IllegalArgumentException {
+
+		// try to instantiate default value
+		if (null == preparedField.defaultValue) {
+			Field field = preparedField.field;
+			try {
+				preparedField.defaultValue = field.getType().newInstance(); // throws IE, IAE
+				field.set(preparedField.object, preparedField.defaultValue); // throws IAE
+			} catch (Exception e) {
+				InstantiationException t = new InstantiationException("Failed to instantiate value for field, probably no-arg constructor is missing in type: " + field.getType().getName());
+				t.initCause(e);
+				throw t;
+			}
+		}
+
+		// avoid infinite loops
+		if (preparedField.object.getClass().isAssignableFrom(preparedField.defaultValue.getClass())) {
+			throw new IllegalArgumentException("Value of recursive field has type same as or inherited type of the parent object - it would lead to recursion!");
+		}
+
+		// generate label
+		Ask ask = preparedField.ask;
+		preparedField.label = ask.value().trim().isEmpty() ? null : ask.value();
+	}
+
 	@Nonnull
-	protected static ConvertTo<?> provideConverter(@Nonnull PreparedField preparedField, @Nonnull Ask ask) throws IllegalAccessException, InstantiationException, NoSuchAlgorithmException {
+	private static ConvertTo<?> provideConverter(@Nonnull PreparedField preparedField, @Nonnull Ask ask) throws IllegalAccessException, InstantiationException, NoSuchAlgorithmException {
 		ConvertTo<?> converter = DefaultConverter.class.equals(ask.converter())
 				? Converters.find(preparedField.field.getType())
 				: ask.converter().newInstance();
 		if (null == converter) {
-			throw new NoSuchAlgorithmException(String.format("No converter found for type %s (field: %s)",
-					preparedField.field.getType().getName(),
-					preparedField.field.getName()));
+			throw new NoSuchAlgorithmException("No converter found for type: " + preparedField.field.getType().getName());
 		}
 		// TODO verify custom converter class' generic type
 		return converter;
+	}
+
+	public Ask getAsk() { // TODO doc
+		return ask;
 	}
 
 	/**
@@ -124,7 +181,7 @@ public class PreparedField {
 		return converter;
 	}
 
-	protected void setConverter(ConvertTo<?> converter) {
+	public void setConverter(ConvertTo<?> converter) {
 		this.converter = converter;
 	}
 
@@ -136,7 +193,7 @@ public class PreparedField {
 		return defaultValue;
 	}
 
-	protected void setDefaultValue(Object defaultValue) {
+	public void setDefaultValue(Object defaultValue) {
 		this.defaultValue = defaultValue;
 	}
 
@@ -157,7 +214,7 @@ public class PreparedField {
 		return label;
 	}
 
-	protected void setLabel(String label) {
+	public void setLabel(String label) {
 		this.label = label;
 	}
 
@@ -169,6 +226,14 @@ public class PreparedField {
 		return object;
 	}
 
+	public boolean isRecursive() { // TODO doc
+		return recursive;
+	}
+
+	public void setRecursive(boolean recursive) {
+		this.recursive = recursive;
+	}
+
 	/**
 	 * @return Whether this field should be asked from user
 	 */
@@ -176,7 +241,7 @@ public class PreparedField {
 		return relevant;
 	}
 
-	protected void setRelevant(boolean relevant) {
+	public void setRelevant(boolean relevant) {
 		this.relevant = relevant;
 	}
 

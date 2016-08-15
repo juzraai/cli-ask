@@ -54,7 +54,9 @@ public @interface Ask {
 	 * means the default converter selector algorithm will be used
 	 */
 	@Nonnull
-	Class<? extends ConvertTo<?>> converter() default DefaultConverter.class;
+	Class<? extends ConvertTo<?>> converter() default DefaultConverter.class; // TODO doc: ensure converter has no-arg constr
+
+	boolean recursive() default false; // TODO doc, ensure it's a different type and has no-arg constr or provide an instance
 
 	/**
 	 * Label to be printed out in front of input cursor. If you leave it empty,

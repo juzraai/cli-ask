@@ -77,12 +77,12 @@ ExamplePojo{name='juzraai', age=42, skippedField='untouched', sure=false}
 
 # Features
 
-* **easy-to-use** - annotation-driven, you have to call one method (per POJO)
+* **easy-to-use** - annotation-driven, you have to call one method (per POJO), does not need fields to be public, nor getter/setter methods
 * **default values** - read from POJO, printed out, and selected when entered input is empty
 * **converting** - automatically selects converter (String -> field type)
 * **reasking** - when there's no default value and input is empty; or input is invalid according to selected converter
-* **flexible** - you can replace default converters and you can add custom converters for types or fields 
-* does not need fields to be public, nor getter/setter methods
+* **flexible** - you can replace built-in converters or add custom ones even for only one field
+* **silent** - stdout is only used for user-level messages, exceptions are written to the log (SLF4J, configureable)
 
 Built-in converters:
 
