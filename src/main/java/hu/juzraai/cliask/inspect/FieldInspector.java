@@ -166,6 +166,21 @@ public class FieldInspector { // TODO doc
 		return preparedField;
 	}
 
+	/**
+	 * Inspects a field which is marked relevant and non-recursive. First, it
+	 * selects/constructs converter instance using {@link
+	 * #provideConverter(PreparedField)} method, then generates a label using
+	 * {@link #generateLabel(PreparedField, boolean)}.
+	 * <p>
+	 * If any error eccurs during converter selection/construction, throws an
+	 * {@link InspectFailedException}.
+	 * <p>
+	 * The default label will be the field name, if {@link Ask} doesn't specify
+	 * a custom label.
+	 *
+	 * @param preparedField Prepared field to be inspected
+	 * @throws InspectFailedException
+	 */
 	protected void inspectNonRecursiveField(@Nonnull PreparedField preparedField) throws InspectFailedException {
 
 		// get converter
@@ -195,6 +210,18 @@ public class FieldInspector { // TODO doc
 		generateLabel(preparedField, false);
 	}
 
+	/**
+	 * Inspects a field which is marked relevant before. Calls {@link
+	 * #extractDefaultValue(PreparedField)} first, then {@link
+	 * #inspectNonRecursiveField(PreparedField)} or {@link
+	 * #inspectNonRecursiveField(PreparedField)} based on <code>recursive</code>
+	 * property of the given prepared field.
+	 * <p>
+	 * Doesn't catch {@link InspectFailedException}'s throwed by called methods.
+	 *
+	 * @param preparedField Prepared field to be inspected
+	 * @throws InspectFailedException
+	 */
 	protected void inspectRelevantField(@Nonnull PreparedField preparedField) throws InspectFailedException {
 		extractDefaultValue(preparedField);
 		if (preparedField.isRecursive()) {
