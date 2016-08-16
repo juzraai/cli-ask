@@ -54,10 +54,12 @@ public class PreparedField {
 		this.ask = ask;
 	}
 
+	@Deprecated
 	private static void determineRelevance(@Nonnull PreparedField preparedField) {
 		preparedField.relevant = null != preparedField.ask && ((preparedField.field.getModifiers() & Modifier.FINAL) != Modifier.FINAL);
 	}
 
+	@Deprecated
 	private static void extractDefaultValue(@Nonnull PreparedField preparedField) throws IllegalAccessException {
 		try {
 			preparedField.field.setAccessible(true); // throws SE
@@ -98,6 +100,7 @@ public class PreparedField {
 	 * @return A {@link PreparedField} object containing the field, the parent
 	 * object, the label, the default value and the converter instance
 	 */
+	@Deprecated
 	@Nonnull
 	public static PreparedField prepare(@Nonnull Field field, @Nonnull Object object) { // TODO doc: about recursive
 		Ask ask = field.getAnnotation(Ask.class);
@@ -121,6 +124,7 @@ public class PreparedField {
 		return preparedField;
 	}
 
+	@Deprecated
 	private static void prepareNonRecursiveField(@Nonnull PreparedField preparedField) throws IllegalAccessException, NoSuchAlgorithmException, InstantiationException {
 		Ask ask = preparedField.ask;
 
@@ -131,6 +135,7 @@ public class PreparedField {
 		preparedField.label = ask.value().trim().isEmpty() ? preparedField.field.getName() : ask.value();
 	}
 
+	@Deprecated
 	private static void prepareRecursiveField(@Nonnull PreparedField preparedField) throws InstantiationException, IllegalArgumentException {
 
 		// try to instantiate default value
@@ -156,6 +161,7 @@ public class PreparedField {
 		preparedField.label = ask.value().trim().isEmpty() ? null : ask.value();
 	}
 
+	@Deprecated
 	@Nonnull
 	private static ConvertTo<?> provideConverter(@Nonnull PreparedField preparedField, @Nonnull Ask ask) throws IllegalAccessException, InstantiationException, NoSuchAlgorithmException {
 		ConvertTo<?> converter = DefaultConverter.class.equals(ask.converter())

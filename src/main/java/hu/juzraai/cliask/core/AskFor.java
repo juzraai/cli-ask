@@ -21,6 +21,7 @@ import hu.juzraai.cliask.convert.ConvertFailedException;
 import hu.juzraai.cliask.convert.Converters;
 
 import javax.annotation.Nonnull;
+import java.util.List;
 import java.util.Scanner;
 
 /**
@@ -88,10 +89,11 @@ public class AskFor { // TODO doc: about recursive
 	public static <T> T object(String label, @Nonnull T object) { // TODO doc: about recursive
 
 		// parse metadata
-		PreparedObject preparedObject = PreparedObject.prepare(object);
+		List<PreparedField> fields = new ObjectInspector(new FieldInspector()).relevantFieldsOf(object);
+		//PreparedObject preparedObject = PreparedObject.prepare(object);
 
 		// if there's any field which needs to be asked
-		if (!preparedObject.getFields().isEmpty()) {
+		if (!fields.isEmpty()) {
 
 			// if we have a dataset name, write header
 			if (null != label && !label.trim().isEmpty()) {
@@ -99,7 +101,7 @@ public class AskFor { // TODO doc: about recursive
 			}
 
 			// ask for fields
-			for (PreparedField field : preparedObject.getFields()) {
+			for (PreparedField field : fields) {
 				preparedField(field);
 			}
 

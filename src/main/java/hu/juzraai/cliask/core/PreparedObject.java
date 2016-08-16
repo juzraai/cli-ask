@@ -29,6 +29,7 @@ import java.util.List;
  *
  * @author Zsolt Jurányi
  */
+@Deprecated
 public class PreparedObject {
 
 	private final Object object;
