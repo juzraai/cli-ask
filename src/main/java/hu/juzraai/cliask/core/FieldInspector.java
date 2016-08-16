@@ -80,7 +80,6 @@ public class FieldInspector { // TODO doc
 	}
 
 	protected void inspectNonRecursiveField(@Nonnull PreparedField preparedField) throws InspectFailedException {
-		Ask ask = preparedField.getAsk();
 
 		// get converter
 		try {
@@ -90,7 +89,7 @@ public class FieldInspector { // TODO doc
 		}
 
 		// generate label - field name if not specified
-		preparedField.setLabel(ask.value().trim().isEmpty() ? preparedField.getField().getName() : ask.value());
+		generateLabel(preparedField, true);
 	}
 
 	protected void instantiateDefaultValue(@Nonnull PreparedField preparedField) throws InspectFailedException {
@@ -116,8 +115,7 @@ public class FieldInspector { // TODO doc
 		}
 
 		// generate label - null if not specified
-		Ask ask = preparedField.getAsk();
-		preparedField.setLabel(ask.value().trim().isEmpty() ? null : ask.value());
+		generateLabel(preparedField, false);
 	}
 
 	protected void inspectRelevantField(@Nonnull PreparedField preparedField) throws InspectFailedException {
@@ -138,6 +136,12 @@ public class FieldInspector { // TODO doc
 		}
 		// TODO verify custom converter class' generic type
 		return converter;
+	}
+
+	protected void generateLabel(@Nonnull PreparedField preparedField, boolean useFieldNameAsDefault) {
+		Ask ask = preparedField.getAsk();
+		String defaultLabel = useFieldNameAsDefault ? preparedField.getField().getName() : null;
+		preparedField.setLabel(ask.value().trim().isEmpty() ? defaultLabel : ask.value());
 	}
 
 }
