@@ -14,11 +14,14 @@
  * limitations under the License.
  */
 
-package hu.juzraai.cliask.core;
+package hu.juzraai.cliask;
 
 import hu.juzraai.cliask.annotation.Ask;
 import hu.juzraai.cliask.convert.ConvertFailedException;
 import hu.juzraai.cliask.convert.Converters;
+import hu.juzraai.cliask.inspect.FieldInspector;
+import hu.juzraai.cliask.inspect.ObjectInspector;
+import hu.juzraai.cliask.inspect.PreparedField;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -90,7 +93,6 @@ public class AskFor { // TODO doc: about recursive
 
 		// parse metadata
 		List<PreparedField> fields = new ObjectInspector(new FieldInspector()).relevantFieldsOf(object);
-		//PreparedObject preparedObject = PreparedObject.prepare(object);
 
 		// if there's any field which needs to be asked
 		if (!fields.isEmpty()) {

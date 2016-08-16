@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hu.juzraai.cliask.core;
+package hu.juzraai.cliask.inspect;
 
 import hu.juzraai.cliask.annotation.Ask;
 import hu.juzraai.cliask.convert.ConvertTo;
@@ -29,6 +29,11 @@ import java.lang.reflect.Modifier;
 import java.security.NoSuchAlgorithmException;
 
 /**
+ * Inspects a given field by extracting it's type, value and arguments of it's
+ * {@link Ask} annotation. Generates a label for the field and decides whether
+ * the field is relevant for asking, whether it should be handled
+ * recursively, and selects an appropriate converter for it.
+ *
  * @author Zsolt Jurányi
  */
 public class FieldInspector { // TODO doc

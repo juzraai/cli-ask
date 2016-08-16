@@ -16,7 +16,7 @@
 
 package hu.juzraai.cliask.example;
 
-import hu.juzraai.cliask.core.AskFor;
+import hu.juzraai.cliask.AskFor;
 
 /**
  * Example program which demonstrates how <code>AskFor.string(String,

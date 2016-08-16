@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hu.juzraai.cliask.core;
+package hu.juzraai.cliask.inspect;
 
 /**
  * @author Zsolt Jurányi

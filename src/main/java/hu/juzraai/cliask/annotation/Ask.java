@@ -16,10 +16,10 @@
 
 package hu.juzraai.cliask.annotation;
 
+import hu.juzraai.cliask.AskFor;
 import hu.juzraai.cliask.convert.ConvertTo;
 import hu.juzraai.cliask.convert.Converters;
 import hu.juzraai.cliask.convert.DefaultConverter;
-import hu.juzraai.cliask.core.AskFor;
 
 import javax.annotation.Nonnull;
 import java.lang.annotation.ElementType;

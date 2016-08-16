@@ -16,8 +16,8 @@
 
 package hu.juzraai.cliask.example;
 
+import hu.juzraai.cliask.AskFor;
 import hu.juzraai.cliask.annotation.Ask;
-import hu.juzraai.cliask.core.AskFor;
 
 /**
  * Example program which demonstrates how <code>AskFor.object(Object)</code>

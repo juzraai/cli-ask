@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hu.juzraai.cliask.core;
+package hu.juzraai.cliask.inspect;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -22,20 +22,43 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Contains method to inspect a POJO. Inspecting means that it analyzes the
+ * object using Reflection and returns with prepared values which then be used
+ * when asking for values.
+ *
  * @author Zsolt Jurányi
  */
-public class ObjectInspector { // TODO doc
+public class ObjectInspector {
 
 	private final FieldInspector fieldInspector;
 
+	/**
+	 * Creates a new instance.
+	 *
+	 * @param fieldInspector Field inspector utility to be used to analyze and
+	 *                       prepare fields of input objects
+	 */
 	public ObjectInspector(FieldInspector fieldInspector) {
 		this.fieldInspector = fieldInspector;
 	}
 
+	/**
+	 * @return Field inspector utility to be used to analyze and prepare fields
+	 * of input objects
+	 */
 	public FieldInspector getFieldInspector() {
 		return fieldInspector;
 	}
 
+	/**
+	 * Iterates through the declared fields of the given object and uses the
+	 * {@link FieldInspector} to analyze them. Returns a list which contains
+	 * those {@link PreparedField} objects which are marked as relevant for
+	 * asking.
+	 *
+	 * @param object Input object to inspected
+	 * @return List of prepared fields which are marked as relevant for asking
+	 */
 	@Nonnull
 	public List<PreparedField> relevantFieldsOf(@Nonnull Object object) {
 		List<PreparedField> fields = new ArrayList<>();
