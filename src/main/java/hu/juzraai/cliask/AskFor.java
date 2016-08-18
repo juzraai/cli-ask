@@ -22,6 +22,7 @@ import hu.juzraai.cliask.convert.Converters;
 import hu.juzraai.cliask.inspect.FieldInspector;
 import hu.juzraai.cliask.inspect.ObjectInspector;
 import hu.juzraai.cliask.inspect.PreparedField;
+import hu.juzraai.cliask.util.AlignedText;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -48,15 +49,12 @@ public class AskFor { // TODO doc: about recursive
 	// TODO README: about recursive
 
 	protected static String generatePrintedLabel(String label, String defaultValue) {
-		// TODO handle long label - insert \n-s after every 40th char
-		// TODO handle multiline label - split by \n, append every line in %n%40s
 		StringBuilder s = new StringBuilder();
-		s.append(String.format("%n%40s", label));
+		s.append(label);
 		if (null != defaultValue) {
-			s.append(String.format("%n%40s", String.format("[default: '%s']", defaultValue)));
+			s.append(String.format("%n%s", String.format("[default: '%s']", defaultValue)));
 		}
-		s.append(" : ");
-		return s.toString();
+		return String.format("%n%s", new AlignedText(40, AlignedText.Align.RIGHT, s.toString()).toString().replaceAll("\n$", " : "));
 	}
 
 	/**

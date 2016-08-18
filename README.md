@@ -83,6 +83,7 @@ ExamplePojo{name='juzraai', age=42, skippedField='untouched', sure=false}
 * **reasking** - when there's no default value and input is empty; or input is invalid according to selected converter
 * **flexible** - you can replace built-in converters or add custom ones even for only one field
 * **silent** - stdout is only used for user-level messages, exceptions are written to the log (SLF4J, configureable)
+* **sexy** - labels can be long, can contain newlines - the text will be aligned automatically to fit 40-char width
 
 Built-in converters:
 
@@ -212,18 +213,16 @@ And finally you can use it in two-ways:
 
 Version   | Status               | Description
 ----------|----------------------|------------
-  1.1.0   | snapshot in `master` | Converter selection in prepare phase
+  1.1.0   | snapshot in `master` | Converter selection in prepare phase, handling long/multiline labels, recursive asking.
 **1.0.0** | **current stable**   | Basic features: ask for string, ask for object, `@Ask` field annotation, labels, converting.
 
 
 
 # Future ideas
 
-* [#10](https://github.com/juzraai/cli-ask/issues/10) handle long/multiline labels
 * [#5](https://github.com/juzraai/cli-ask/issues/5) ask for simple objects
 * [#2](https://github.com/juzraai/cli-ask/issues/2) raw value validation
 * [#2](https://github.com/juzraai/cli-ask/issues/2) (final, converted) value validation
 * [#4](https://github.com/juzraai/cli-ask/issues/4) skip condition - e.g. skip asking GitHub repo if GitHub user is empty
-* [#7](https://github.com/juzraai/cli-ask/issues/7) recursive "asking" - go deeper in POJOs
 * [#3](https://github.com/juzraai/cli-ask/issues/3) optional values - accept empty input
 * colored output using [Jansi](https://github.com/fusesource/jansi)
