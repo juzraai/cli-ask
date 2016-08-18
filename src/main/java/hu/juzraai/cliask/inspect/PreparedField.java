@@ -31,7 +31,7 @@ import java.lang.reflect.Field;
  *
  * @author Zsolt Jurányi
  */
-public class PreparedField { // TODO doc
+public class PreparedField { // TODO doc: class, getters-setters
 
 	private static final Logger L = LoggerFactory.getLogger(PreparedField.class);
 

@@ -29,19 +29,19 @@ import java.lang.reflect.Modifier;
 import java.security.NoSuchAlgorithmException;
 
 /**
- * Inspects a given field by extracting it's type, value and arguments of it's
+ * Inspects a given field by extracting its type, value and arguments of its
  * {@link Ask} annotation. Generates a label for the field and decides whether
  * the field is relevant for asking, whether it should be handled
  * recursively, and selects an appropriate converter for it.
  *
  * @author Zsolt Jurányi
  */
-public class FieldInspector { // TODO doc
+public class FieldInspector {
 
 	private static final Logger L = LoggerFactory.getLogger(FieldInspector.class);
 
 	/**
-	 * Determines whether the given field is relevant for asking, sets it's
+	 * Determines whether the given field is relevant for asking, sets its
 	 * <code>relevant</code> field and returns with the decision too.
 	 * <p>
 	 * A field is relevant for asking if it has {@link Ask} annotation and if
@@ -52,7 +52,7 @@ public class FieldInspector { // TODO doc
 	 * field irrelevant if errors occur during inspection.
 	 *
 	 * @param preparedField Prepared field to be inspected
-	 * @return
+	 * @return Whether the field is relevant for asking - based on its metadata
 	 */
 	protected boolean determineIfRelevant(@Nonnull PreparedField preparedField) {
 		boolean r = null != preparedField.getAsk() && ((preparedField.getField().getModifiers() & Modifier.FINAL) != Modifier.FINAL);
@@ -68,12 +68,14 @@ public class FieldInspector { // TODO doc
 	 * throws {@link InspectFailedException}.
 	 *
 	 * @param preparedField Prepared field to be inspected
-	 * @throws InspectFailedException
+	 * @throws InspectFailedException if any error occurred when getting default
+	 *                                value
 	 */
 	protected void extractDefaultValue(@Nonnull PreparedField preparedField) throws InspectFailedException {
 		try {
-			preparedField.getField().setAccessible(true); // throws SE
-			preparedField.setDefaultValue(preparedField.getField().get(preparedField.getObject())); // throws IAE
+			Field field = preparedField.getField();
+			field.setAccessible(true); // throws SE
+			preparedField.setDefaultValue(field.get(preparedField.getObject())); // throws IAE
 		} catch (Exception e) {
 			throw new InspectFailedException("Failed to get field value", e);
 		}
@@ -81,7 +83,7 @@ public class FieldInspector { // TODO doc
 
 	/**
 	 * Generates the label for the given field. If {@link Ask} has a non-empty
-	 * label in it's <code>value</code> argument, that value will be used as
+	 * label in its <code>value</code> argument, that value will be used as
 	 * label. Otherwise the field name or <code>null</code> will be used
 	 * according to the value of <code>useFieldNameAsDefault</code> argument.
 	 * <p>
@@ -95,9 +97,9 @@ public class FieldInspector { // TODO doc
 	 *                              Ask}'s <code>value</code> is empty
 	 */
 	protected void generateLabel(@Nonnull PreparedField preparedField, boolean useFieldNameAsDefault) {
-		Ask ask = preparedField.getAsk();
+		String label = preparedField.getAsk().value();
 		String defaultLabel = useFieldNameAsDefault ? preparedField.getField().getName() : null;
-		preparedField.setLabel(ask.value().trim().isEmpty() ? defaultLabel : ask.value());
+		preparedField.setLabel(label.trim().isEmpty() ? defaultLabel : label);
 	}
 
 	/**
@@ -179,7 +181,8 @@ public class FieldInspector { // TODO doc
 	 * a custom label.
 	 *
 	 * @param preparedField Prepared field to be inspected
-	 * @throws InspectFailedException
+	 * @throws InspectFailedException if any error occured during converter
+	 *                                construction, selection, or setting
 	 */
 	protected void inspectNonRecursiveField(@Nonnull PreparedField preparedField) throws InspectFailedException {
 
@@ -194,6 +197,21 @@ public class FieldInspector { // TODO doc
 		generateLabel(preparedField, true);
 	}
 
+	/**
+	 * Inspects a field which is marked relevant and recursive. If default value
+	 * is <code>null</code>, tries to instantiate it first by calling {@link
+	 * #instantiateDefaultValue(PreparedField)}. Then it checks whether parent
+	 * object's type is assignable from the field type - if so, that would lead
+	 * to an infinite loop, so throws an {@link InspectFailedException} to avoid
+	 * it. Finally generates the label using {@link #generateLabel(PreparedField,
+	 * boolean)}, the default label will be <code>null</code>, if {@link Ask}
+	 * doesn't specify a custom label.
+	 *
+	 * @param preparedField Prepared field to be inspected
+	 * @throws InspectFailedException if any error occurred during default value
+	 *                                instantiation and setting, or if recursion
+	 *                                would lead to infinite loop
+	 */
 	protected void inspectRecursiveField(@Nonnull PreparedField preparedField) throws InspectFailedException {
 
 		// try to instantiate default value
@@ -203,7 +221,7 @@ public class FieldInspector { // TODO doc
 
 		// avoid infinite loops
 		if (preparedField.getObject().getClass().isAssignableFrom(preparedField.getDefaultValue().getClass())) {
-			throw new InspectFailedException("Parent object's type is assignable from type of recursive field's value - this would lead to recursion!");
+			throw new InspectFailedException("Parent object's type is assignable from type of recursive field's value - this would lead to infinite loop!");
 		}
 
 		// generate label - null if not specified
@@ -220,7 +238,7 @@ public class FieldInspector { // TODO doc
 	 * Doesn't catch {@link InspectFailedException}'s throwed by called methods.
 	 *
 	 * @param preparedField Prepared field to be inspected
-	 * @throws InspectFailedException
+	 * @throws InspectFailedException if any error occurred during inspection
 	 */
 	protected void inspectRelevantField(@Nonnull PreparedField preparedField) throws InspectFailedException {
 		extractDefaultValue(preparedField);
@@ -231,6 +249,19 @@ public class FieldInspector { // TODO doc
 		}
 	}
 
+	/**
+	 * Instantiates the default value by calling the no-arg constructor of the
+	 * field's type. After constructing the object, set's this value to the
+	 * field. If any error occurs during this operations, throws an {@link
+	 * InspectFailedException}.
+	 * <p>
+	 * This instantiation is needed in recursive mode when default value is
+	 * null.
+	 *
+	 * @param preparedField Prepared field to be inspected
+	 * @throws InspectFailedException if any error occurred during instantiation
+	 *                                and setting
+	 */
 	protected void instantiateDefaultValue(@Nonnull PreparedField preparedField) throws InspectFailedException {
 		Field field = preparedField.getField();
 		try {
@@ -241,12 +272,36 @@ public class FieldInspector { // TODO doc
 		}
 	}
 
+	/**
+	 * Instantiates the custom converter if the class was specified in {@link
+	 * Ask}, or selects a converter from the pool using {@link Converters}.
+	 * Exceptions thrown by Reflection when constructing the objects won't be
+	 * catched and if no suitable constructor available, throws {@link
+	 * NoSuchAlgorithmException}.
+	 *
+	 * @param preparedField Prepared field to be inspected
+	 * @return A converter instance - of the custom converter class or the
+	 * selected converter from the pool, if any
+	 * @throws IllegalAccessException   if the class or its nullary constructor
+	 *                                  is not accessible
+	 * @throws InstantiationException   if converter class represents an
+	 *                                  abstract class, an interface, an array
+	 *                                  class, a primitive type, or void; or if
+	 *                                  the class has no nullary constructor; or
+	 *                                  if the instantiation fails for some
+	 *                                  other reason
+	 * @throws NoSuchAlgorithmException if no suitable converter found in the
+	 *                                  pool for the field type
+	 */
+	@Nonnull
 	protected ConvertTo<?> provideConverter(@Nonnull PreparedField preparedField) throws IllegalAccessException, InstantiationException, NoSuchAlgorithmException {
-		ConvertTo<?> converter = DefaultConverter.class.equals(preparedField.getAsk().converter())
-				? Converters.find(preparedField.getField().getType())
-				: preparedField.getAsk().converter().newInstance();
+		Class<? extends ConvertTo<?>> converterClass = preparedField.getAsk().converter();
+		Class<?> fieldType = preparedField.getField().getType();
+		ConvertTo<?> converter = DefaultConverter.class.equals(converterClass)
+				? Converters.find(fieldType)
+				: converterClass.newInstance();
 		if (null == converter) {
-			throw new NoSuchAlgorithmException("No converter found for type: " + preparedField.getField().getType().getName());
+			throw new NoSuchAlgorithmException("No converter found for type: " + fieldType.getName());
 		}
 		// TODO verify custom converter class' generic type
 		return converter;

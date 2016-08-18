@@ -67,7 +67,7 @@ public class AskFor { // TODO doc: about recursive
 	 * If a field has a non-null value, that will be treated as a default value.
 	 * If the user provides empty input for the field, it won't be modified.
 	 * <p>
-	 * If a field is <code>null</code>, user will be asked for it's value until
+	 * If a field is <code>null</code>, user will be asked for its value until
 	 * a non-empty input.
 	 * <p>
 	 * User's raw string input is converted into the type of the field using
@@ -120,7 +120,7 @@ public class AskFor { // TODO doc: about recursive
 	 * If a field has a non-null value, that will be treated as a default value.
 	 * If the user provides empty input for the field, it won't be modified.
 	 * <p>
-	 * If a field is <code>null</code>, user will be asked for it's value until
+	 * If a field is <code>null</code>, user will be asked for its value until
 	 * a non-empty input.
 	 * <p>
 	 * User's raw string input is converted into the type of the field using
@@ -147,14 +147,16 @@ public class AskFor { // TODO doc: about recursive
 	}
 
 	protected static void preparedField(@Nonnull PreparedField preparedField) {
-		if (preparedField.isRecursive()) { // avoiding of infinite loops handled in prepare
-			object(preparedField.getLabel(), preparedField.getDefaultValue());
+		Object defaultValue = preparedField.getDefaultValue();
+		String label = preparedField.getLabel();
+		if (preparedField.isRecursive()) { // avoiding of infinite loops handled in field inspector
+			object(label, defaultValue);
 		} else {
-			String dv = null == preparedField.getDefaultValue() ? null : preparedField.getDefaultValue().toString();
+			String dv = null == defaultValue ? null : defaultValue.toString();
 			boolean repeat;
 			do {
 				repeat = false;
-				String rawValue = string(preparedField.getLabel(), dv);
+				String rawValue = string(label, dv);
 				try {
 					if (!rawValue.equals(dv)) { // no need to process default value
 
